@@ -1,15 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Upload</title>
-    </head>
+<!-- <!doctype html>
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/upload_page.css') }}">
+<title>Upload new File</title>
 
-    <body>
-        <h1>File Uploader</h1>
-        <form id="upload-form" action="{{ url_for('upload')}}" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*"> 
-            <input type="submit" value="send">
+<body>
+    <div>
+        <h1>Upload new File</h1>
+        <form style="justify-content: center;" method=post enctype=multipart/form-data style="display: inline-block;">
+            <input type=file name=file>
+            <input type=submit value=Upload>
+            <h1>{{no_file}}</h1>
         </form>
-    </body>
+        {%if no_file_selected%}
+            <h3>No file was selected. Please select a file.</h3>
+        {% endif %}
+    </div>
+</body> -->
+
+<!DOCTYPE html>
+<html>
+<title>Upload Page</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif;}
+body, html {
+  height: 100%;
+  color: #777;
+  line-height: 1.8;
+}
+
+/* First image (Logo. Full height) */
+.bgimg-1 {
+  background-image:  url('https://c8.alamy.com/comp/2A9AWM1/abstract-background-of-human-body-anatomy-and-dna-muscle-anatomy-structure-in-blue-medical-background-dna-human-anatomy-model-3d-render-2A9AWM1.jpg');
+  min-height: 70%;
+}
+
+#upload {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.w3-wide {letter-spacing: 7px;}
+.w3-hover-opacity {cursor: pointer;}
+</style>
+
+<body>
+<!-- Navbar (sit on top) -->
+<div class="w3-top">
+  <div class="w3-bar" id="myNavbar">
+    <a class="w3-bar-item w3-button w3-hover-black w3-hide-medium w3-hide-large w3-right" href="javascript:void(0);" onclick="toggleFunction()" title="Toggle Navigation Menu">
+      <i class="fa fa-bars"></i>
+    </a>
+    <a href="#home" class="w3-bar-item w3-button">HOME</a>
+    <a href="#upload" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-user"></i>Upload</a>
+  </div>
+
+  <!-- Navbar on small screens -->
+  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium">
+    <a href="#upload" class="w3-bar-item w3-button" onclick="toggleFunction()">Upload</a>
+  </div>
+</div>
+
+<!-- First Parallax Image with Logo Text -->
+<div class="bgimg-1 w3-display-container w3-opacity-min" id="home">
+  <div class="w3-display-middle" style="white-space:nowrap;">
+    <span class="w3-center w3-padding-large w3-black w3-xlarge w3-wide w3-animate-opacity">Jugular  Venous  Pressure</span>
+  </div>
+</div>
+
+
+<div id="upload">
+    <h1 class="w3-center">Upload new File</h1>
+    <form style="text-align: center;" method=post enctype=multipart/form-data style="display: inline-block;">
+        <input type=file name=file>
+        <input type=submit value=Upload>
+    </form>
+    {%if no_file_selected%}
+        <h3>No file was selected. Please select a file.</h3>
+    {% endif %}
+</div>
+
+ 
+<script>
+
+// Change style of navbar on scroll
+window.onscroll = function() {myFunction()};
+function myFunction() {
+    var navbar = document.getElementById("myNavbar");
+    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+        navbar.className = "w3-bar" + " w3-card" + " w3-animate-top" + " w3-white";
+    } else {
+        navbar.className = navbar.className.replace(" w3-card w3-animate-top w3-white", "");
+    }
+}
+
+// Used to toggle the menu on small screens when clicking on the menu button
+function toggleFunction() {
+    var x = document.getElementById("navDemo");
+    if (x.className.indexOf("w3-show") == -1) {
+        x.className += " w3-show";
+    } else {
+        x.className = x.className.replace(" w3-show", "");
+    }
+}
+</script>
+
+</body>
 </html>
