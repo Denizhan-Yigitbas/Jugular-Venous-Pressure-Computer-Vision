@@ -48,7 +48,7 @@ def uploaded_file(filename):
     image_file = image_file.convert('1') # convert image to black and white
     image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename, as_attachment=False)
+                               filename, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
