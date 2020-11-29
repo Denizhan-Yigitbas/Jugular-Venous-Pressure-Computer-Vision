@@ -1,22 +1,60 @@
-<!-- <!doctype html>
+<!doctype html>
+
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/upload_page.css') }}">
+
 <title>Upload new File</title>
+<div>
+  <h1 class="">Upload new File</h1>
 
-<body>
+  <form method=post enctype=multipart/form-data>
     <div>
-        <h1>Upload new File</h1>
-        <form style="justify-content: center;" method=post enctype=multipart/form-data style="display: inline-block;">
-            <input type=file name=file>
-            <input type=submit value=Upload>
-            <h1>{{no_file}}</h1>
-        </form>
-        {%if no_file_selected%}
-            <h3>No file was selected. Please select a file.</h3>
-        {% endif %}
+      <input type=file name=file>
+      <input type=submit value=Upload>
     </div>
-</body> -->
 
-<!DOCTYPE html>
+    <div class="parameterInput" style="align-items: center;">
+      <label for="alpha">Alpha: </label>
+      <input type="number" id="alpha" name="alpha" min="0" max="100" value="20">
+    </div>
+
+    <div class="parameterInput">
+      <label for="cutoff">Cutoff: </label>
+      <input type="number" id="cutoff" name="cutoff" value="16">
+    </div>
+
+    <div class="parameterInput">
+      <label for="low">Low: </label>
+      <input type="number" id="low" name="low" value="1">
+    </div>
+
+    <div class="parameterInput">
+      <label for="high">High: </label>
+      <input type="number" id="high" name="high" value="1">
+    </div>
+
+    <div class="parameterInput">
+      <label for="linearAttenuation">Linear Attenuation: </label>
+      <input type="number" id="linearAttenuation" name="linearAttenuation" value="1">
+    </div>
+    
+    <div class="parameterInput">
+      <label for="chromAttenuation">Chromatic Attenuation: </label>
+      <input type="number" id="chromAttenuation" name="chromAttenuation" value="1">
+    </div>
+    
+  </form>
+
+  {%if no_file_selected%}
+      <h3>No file was selected. Please select a file.</h3>
+  {% endif %}
+</div>
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
 <html>
 <title>Upload Page</title>
 <meta charset="UTF-8">
@@ -24,6 +62,9 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/upload_page.css') }}">
+
 <style>
 body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif;}
 body, html {
@@ -35,7 +76,7 @@ body, html {
 /* First image (Logo. Full height) */
 .bgimg-1 {
   background-image:  url('https://c8.alamy.com/comp/2A9AWM1/abstract-background-of-human-body-anatomy-and-dna-muscle-anatomy-structure-in-blue-medical-background-dna-human-anatomy-model-3d-render-2A9AWM1.jpg');
-  min-height: 70%;
+  min-height: 50%;
 }
 
 #upload {
@@ -47,44 +88,70 @@ body, html {
 .w3-hover-opacity {cursor: pointer;}
 </style>
 
-<body>
+<body> -->
 <!-- Navbar (sit on top) -->
-<div class="w3-top">
+<!-- <div class="w3-top">
   <div class="w3-bar" id="myNavbar">
     <a class="w3-bar-item w3-button w3-hover-black w3-hide-medium w3-hide-large w3-right" href="javascript:void(0);" onclick="toggleFunction()" title="Toggle Navigation Menu">
       <i class="fa fa-bars"></i>
     </a>
     <a href="#home" class="w3-bar-item w3-button">HOME</a>
     <a href="#upload" class="w3-bar-item w3-button w3-hide-small"><i class="fa fa-user"></i>Upload</a>
-  </div>
+  </div> -->
 
   <!-- Navbar on small screens -->
-  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium">
+  <!-- <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium">
     <a href="#upload" class="w3-bar-item w3-button" onclick="toggleFunction()">Upload</a>
   </div>
-</div>
+</div> -->
 
 <!-- First Parallax Image with Logo Text -->
-<div class="bgimg-1 w3-display-container w3-opacity-min" id="home">
+<!-- <div class="bgimg-1 w3-display-container w3-opacity-min" id="home">
   <div class="w3-display-middle" style="white-space:nowrap;">
     <span class="w3-center w3-padding-large w3-black w3-xlarge w3-wide w3-animate-opacity">Jugular  Venous  Pressure</span>
   </div>
-</div>
+</div> -->
 
-
+<!-- 
 <div id="upload">
     <h1 class="w3-center">Upload new File</h1>
     <form style="text-align: center;" method=post enctype=multipart/form-data style="display: inline-block;">
+      <div>
         <input type=file name=file>
         <input type=submit value=Upload>
+      </div>
+      <div class="parameterInput">
+        <label for="alpha">Alpha: </label>
+        <input type="number" id="alpha" name="alpha" min="0" max="100" value="20">
+      </div>
+      <div class="parameterInput">
+        <label for="cutoff">Cutoff: </label>
+        <input type="number" id="cutoff" name="cutoff" value="16">
+      </div>
+      <div class="parameterInput">
+        <label for="low">Low: </label>
+        <input type="number" id="low" name="low" value="0.83">
+      </div>
+      <div class="parameterInput"></div>
+        <label for="high">High: </label>
+        <input type="number" id="high" name="high" value="1">
+      </div>
+      <div class="parameterInput"></div>
+        <label for="linearAttenuation">Linear Attenuation: </label>
+        <input type="number" id="linearAttenuation" name="linearAttenuation" value="1">
+      </div>
+      <div class="parameterInput"></div>
+        <label for="chromAttenuation">Chromatic Attenuation: </label>
+        <input type="number" id="chromAttenuation" name="chromAttenuation" value="1">
+      </div>
     </form>
     {%if no_file_selected%}
         <h3>No file was selected. Please select a file.</h3>
     {% endif %}
 </div>
 
- 
-<script>
+  -->
+<!-- <script>
 
 // Change style of navbar on scroll
 window.onscroll = function() {myFunction()};
@@ -109,4 +176,4 @@ function toggleFunction() {
 </script>
 
 </body>
-</html>
+</html> -->

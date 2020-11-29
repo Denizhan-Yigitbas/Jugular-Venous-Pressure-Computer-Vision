@@ -1,9 +1,10 @@
 h1 {
-    /* color: steelblue; */
-    text-decoration: underline;
-    text-align: center;
+    color: steelblue;
+    /* text-decoration: underline; */
+    /* text-align: center; */
 }
 
-form {
-    text-align: center;
+
+.parameterInput {
+    margin: 20px;
 }
