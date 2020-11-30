@@ -2,7 +2,7 @@
 
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/upload_page.css') }}">
 
-<title>Upload new File</title>
+<!-- <title>Upload new File</title>
 <div>
   <h1 class="">Upload new File</h1>
 
@@ -48,10 +48,25 @@
       <h3>No file was selected. Please select a file.</h3>
   {% endif %}
 </div>
+-->
 
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
 
-
-
+<script>
+  $(document).ready(function(){
+    $('form input').change(function () {
+      $('form p').text(this.files.length + " file(s) selected");
+    });
+  }); 
+</script>
+<h1>Eulerian Magnification for Jugular Venous Pressure</h1>
+<form method=post enctype=multipart/form-data>
+  <input type="file" name=file>
+  <p>Drag your files here or click in this area</p>
+  <button type="submit" value="Upload">Upload</button>
+</form>
 
 
 <!-- <!DOCTYPE html>
