@@ -3,10 +3,11 @@ import cv2
 import numpy as np
 from scipy.signal import butter, lfilter
 import platform
+from scipy import fftpack
 
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
-from PIL import Image 
+from PIL import Image
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -19,10 +20,12 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'mp4'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
 # check if selected file is verified
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -45,6 +48,7 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file', filename=filename))
     return render_template('upload.html', no_file_selected=False)
+
 
 def load_video(vidFile):
     '''
@@ -71,6 +75,7 @@ def load_video(vidFile):
 
     return video_stack, fr, vidWidth, vidHeight
 
+
 def rgb2yiq(video):
     '''
     Converts the video color from RGB to YIQ (NTSC)
@@ -82,6 +87,7 @@ def rgb2yiq(video):
                              [0.211, -0.523, 0.312]])
     t = np.dot(video, yiq_from_rgb.T)
     return t
+
 
 def calculate_pyramid_levels(vidWidth, vidHeight):
     '''
@@ -95,6 +101,7 @@ def calculate_pyramid_levels(vidWidth, vidHeight):
         levels = int(np.log2(vidHeight))
 
     return levels
+
 
 def create_gaussian_pyramid(image, levels):
     '''
@@ -112,6 +119,7 @@ def create_gaussian_pyramid(image, levels):
 
     return gauss_pyr
 
+
 def gaussian_video(video_tensor, levels):
     '''
     For a given video sequence the function creates a video with
@@ -124,11 +132,12 @@ def gaussian_video(video_tensor, levels):
         frame = video_tensor[i]
         pyr = create_gaussian_pyramid(frame, levels)
         gaussian_frame = pyr[-1]  # use only highest gaussian level
-        if i == 0:                # initialize one time
+        if i == 0:  # initialize one time
             vid_data = np.zeros((video_tensor.shape[0], gaussian_frame.shape[0], gaussian_frame.shape[1], 3))
 
         vid_data[i] = gaussian_frame
     return vid_data
+
 
 def create_laplacian_pyramid(image, levels):
     '''
@@ -139,12 +148,13 @@ def create_laplacian_pyramid(image, levels):
     '''
     gauss_pyramid = create_gaussian_pyramid(image, levels)
     laplace_pyramid = []
-    for i in range(levels-1):
+    for i in range(levels - 1):
         size = (gauss_pyramid[i].shape[1], gauss_pyramid[i].shape[0])  # reshape
-        laplace_pyramid.append(gauss_pyramid[i]-cv2.pyrUp(gauss_pyramid[i+1], dstsize=size))
+        laplace_pyramid.append(gauss_pyramid[i] - cv2.pyrUp(gauss_pyramid[i + 1], dstsize=size))
 
     laplace_pyramid.append(gauss_pyramid[-1])  # add last gauss pyramid level
     return laplace_pyramid
+
 
 def laplacian_video_pyramid(video_stack, levels):
     '''
@@ -166,6 +176,7 @@ def laplacian_video_pyramid(video_stack, levels):
 
     return laplace_video_pyramid
 
+
 def butter_bandpass(lowcut, highcut, fs, order=1):
     '''
     Calculates the Butterworth bandpass filter
@@ -180,6 +191,7 @@ def butter_bandpass(lowcut, highcut, fs, order=1):
     high = highcut / fs
     b, a = butter(order, [low, high], btype='band')
     return b, a
+
 
 def apply_butter(laplace_video_list, levels, alpha, cutoff, low, high, fps, width, height, linearAttenuation):
     '''
@@ -231,6 +243,26 @@ def apply_butter(laplace_video_list, levels, alpha, cutoff, low, high, fps, widt
 
     return filtered_video_list
 
+
+def ideal_bandpass(laplace_video_list, alpha, low, high, fps):
+
+    print("Applying bandpass between " + str(low) + " and " + str(high) + " Hz")
+
+    fft = fftpack.rfft(laplace_video_list, axis=0)
+
+    frequencies = fftpack.rfftfreq(fft.shape[0], d=1.0 / fps)
+
+    mask = np.logical_and(frequencies > low, frequencies < high)
+
+    fft[~mask] = 0
+
+    filtered = fftpack.irfft(fft, axis=0)
+
+    filtered *= alpha
+
+    return filtered
+
+
 def reconstruct(filtered_video, levels):
     '''
     Reconstructs a video sequence from the filtered Laplace video pyramid
@@ -241,14 +273,15 @@ def reconstruct(filtered_video, levels):
     final = np.empty(filtered_video[0].shape)
     for i in range(filtered_video[0].shape[0]):  # iterate through frames
 
-        up = filtered_video[-1][i]         # highest level
-        for k in range(levels-1, 0, -1):       # going down to lowest level
-            size = (filtered_video[k-1][i].shape[1], filtered_video[k-1][i].shape[0])  # reshape
-            up = cv2.pyrUp(up, dstsize=size) + filtered_video[k-1][i]
+        up = filtered_video[-1][i]  # highest level
+        for k in range(levels - 1, 0, -1):  # going down to lowest level
+            size = (filtered_video[k - 1][i].shape[1], filtered_video[k - 1][i].shape[0])  # reshape
+            up = cv2.pyrUp(up, dstsize=size) + filtered_video[k - 1][i]
 
         final[i] = up
 
     return final
+
 
 def yiq2rgb(video):
     '''
@@ -262,23 +295,27 @@ def yiq2rgb(video):
     t = np.dot(video, rgb_from_yiq.T)
     return t
 
-def save_video(video_tensor, fps, filename):
+
+def save_video(video_tensor, fps, filename, var):
     '''
     Creates a new video for the output
     :param video_tensor: filtered video sequence
     :param fps: frame rate of original video
-    :param name: output video name
+    :param filename: input video name
+    :param var: variables used in EVM (alpha, cutoff, low, high, linearattenuation, chromattenuation)
     '''
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if platform.system()=='Linux':
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename.split('.')[0])
+    extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ')'
+    if platform.system() == 'Linux':
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     else:
         fourcc = cv2.VideoWriter_fourcc(*'PIM1')
     [height, width] = video_tensor[0].shape[0:2]
-    writer = cv2.VideoWriter(path+"Out.avi", fourcc, fps, (width, height), 1)
+    writer = cv2.VideoWriter(path + '_amp' + extra + '.avi', fourcc, fps, (width, height), 1)
     for i in range(video_tensor.shape[0]):
         writer.write(cv2.convertScaleAbs(video_tensor[i]))
     writer.release()
+
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -287,8 +324,9 @@ def uploaded_file(filename):
     low = 0.83
     high = 1
     linearAttenuation = 1
-
     chromAttenuation = 1
+
+    var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
 
     print("File Submission Clicked")
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -298,7 +336,8 @@ def uploaded_file(filename):
     print("Pyramid Calculated")
     lap_video_list = laplacian_video_pyramid(t, levels)
     print("Laplacian Video Created")
-    filtered_video_list = apply_butter(lap_video_list, levels, alpha, cutoff, low, high, fps, width, height, linearAttenuation)
+    filtered_video_list = apply_butter(lap_video_list, levels, alpha, cutoff, low, high, fps, width, height,
+                                       linearAttenuation)
     print("Butterworth Filter Applied")
     final = reconstruct(filtered_video_list, levels)
     print("Video Reconstructed")
@@ -316,9 +355,9 @@ def uploaded_file(filename):
     # Cutoff wrong values
     final[final < 0] = 0
     final[final > 255] = 255
-    
+
     print("Saving Video")
-    save_video(final, fps, filename)
+    save_video(final, fps, filename, var)
     print("Video Saved!!!")
 
     # Convert uploaded image to Black and White - REMOVE
@@ -327,7 +366,8 @@ def uploaded_file(filename):
     # image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename+"Out.avi", as_attachment=True)
+                               filename + "Out.avi", as_attachment=True)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
