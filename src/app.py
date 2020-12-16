@@ -4,6 +4,7 @@ import numpy as np
 from scipy.signal import butter, lfilter
 import platform
 from scipy import fftpack
+import time
 
 from flask import Flask, flash, request, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
@@ -56,7 +57,6 @@ def load_video(vidFile):
     :param vidFile: Video file
     :return: video sequence, frame rate, width & height of video frames
     '''
-    print('Load video')
     vid = cv2.VideoCapture(vidFile)
     fr = vid.get(cv2.CAP_PROP_FPS)  # frame rate
     len = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -296,26 +296,42 @@ def yiq2rgb(video):
     return t
 
 
-def save_video(video_tensor, fps, filename, var):
+# def save_video(video_tensor, fps, filename, var):
+#     '''
+#     Creates a new video for the output
+#     :param video_tensor: filtered video sequence
+#     :param fps: frame rate of original video
+#     :param filename: input video name
+#     :param var: variables used in EVM (alpha, cutoff, low, high, linearattenuation, chromattenuation)
+#     '''
+#     path = os.path.join(app.config['UPLOAD_FOLDER'], filename.split('.')[0])
+#     extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ')'
+#     if platform.system() == 'Linux':
+#         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+#     else:
+#         fourcc = cv2.VideoWriter_fourcc(*'PIM1')
+#     [height, width] = video_tensor[0].shape[0:2]
+#     writer = cv2.VideoWriter(path + '_amp' + extra + '.avi', fourcc, fps, (width, height), 1)
+#     for i in range(video_tensor.shape[0]):
+#         writer.write(cv2.convertScaleAbs(video_tensor[i]))
+#     writer.release()
+def save_video(video_tensor, fps, filename):
     '''
     Creates a new video for the output
     :param video_tensor: filtered video sequence
     :param fps: frame rate of original video
-    :param filename: input video name
-    :param var: variables used in EVM (alpha, cutoff, low, high, linearattenuation, chromattenuation)
+    :param name: output video name
     '''
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename.split('.')[0])
-    extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ')'
-    if platform.system() == 'Linux':
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if platform.system()=='Linux':
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     else:
         fourcc = cv2.VideoWriter_fourcc(*'PIM1')
     [height, width] = video_tensor[0].shape[0:2]
-    writer = cv2.VideoWriter(path + '_amp' + extra + '.avi', fourcc, fps, (width, height), 1)
+    writer = cv2.VideoWriter(path+"Out.avi", fourcc, fps, (width, height), 1)
     for i in range(video_tensor.shape[0]):
         writer.write(cv2.convertScaleAbs(video_tensor[i]))
     writer.release()
-
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -326,14 +342,23 @@ def uploaded_file(filename):
     linearAttenuation = 1
     chromAttenuation = 1
 
-    var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
+    # var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
 
     print("File Submission Clicked")
+    print("Loading Video...")
+    start = time.time()
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    print("Video Loaded")
+    end = time.time()
+    print("Video Loaded in " + str(end-start) +" seconds")
+
+    print("Calculating Laplacian Pyramid")
+    start = time.time()
     t = rgb2yiq(t)
     levels = calculate_pyramid_levels(width, height)
-    print("Pyramid Calculated")
+    end = time.time()
+    print("Laplacian Pyramid Calculated in " + str(end-start) + " seconds")
+
+
     lap_video_list = laplacian_video_pyramid(t, levels)
     print("Laplacian Video Created")
     filtered_video_list = apply_butter(lap_video_list, levels, alpha, cutoff, low, high, fps, width, height,
@@ -357,7 +382,7 @@ def uploaded_file(filename):
     final[final > 255] = 255
 
     print("Saving Video")
-    save_video(final, fps, filename, var)
+    save_video(final, fps, filename)
     print("Video Saved!!!")
 
     # Convert uploaded image to Black and White - REMOVE
