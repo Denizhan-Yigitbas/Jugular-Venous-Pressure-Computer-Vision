@@ -349,23 +349,33 @@ def uploaded_file(filename):
     start = time.time()
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     end = time.time()
-    print("Video Loaded in " + str(end-start) +" seconds")
+    print("Video Loaded in " + str(end-start) +" seconds\n")
 
     print("Calculating Laplacian Pyramid")
     start = time.time()
     t = rgb2yiq(t)
     levels = calculate_pyramid_levels(width, height)
     end = time.time()
-    print("Laplacian Pyramid Calculated in " + str(end-start) + " seconds")
+    print("Laplacian Pyramid Calculated in " + str(end-start) + " seconds\n")
 
-
+    print("Creating Laplacian Video")
+    start = time.time()
     lap_video_list = laplacian_video_pyramid(t, levels)
-    print("Laplacian Video Created")
+    end = time.time()
+    print("Laplacian Video created in " + str(end-start) + " seconds\n")
+
+    print("Applying Butterworth Filter")
+    start = time.time()
     filtered_video_list = apply_butter(lap_video_list, levels, alpha, cutoff, low, high, fps, width, height,
                                        linearAttenuation)
-    print("Butterworth Filter Applied")
+    end = time.time()
+    print("Butterworth Filter Applied in " + str(end-start) + " seconds\n")
+
+    print("Reconstructing Video")
+    start = time.time()
     final = reconstruct(filtered_video_list, levels)
-    print("Video Reconstructed")
+    end = time.time()
+    print("Video Reconstructed in " + str(end-start) + " seconds\n")
 
     # chromatic attenuation
     final[:][:][:][1] *= chromAttenuation
