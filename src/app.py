@@ -245,7 +245,6 @@ def apply_butter(laplace_video_list, levels, alpha, cutoff, low, high, fps, widt
 
 
 def ideal_bandpass(laplace_video_list, alpha, low, high, fps):
-
     print("Applying bandpass between " + str(low) + " and " + str(high) + " Hz")
 
     fft = fftpack.rfft(laplace_video_list, axis=0)
@@ -296,25 +295,30 @@ def yiq2rgb(video):
     return t
 
 
-# def save_video(video_tensor, fps, filename, var):
-#     '''
-#     Creates a new video for the output
-#     :param video_tensor: filtered video sequence
-#     :param fps: frame rate of original video
-#     :param filename: input video name
-#     :param var: variables used in EVM (alpha, cutoff, low, high, linearattenuation, chromattenuation)
-#     '''
-#     path = os.path.join(app.config['UPLOAD_FOLDER'], filename.split('.')[0])
-#     extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ')'
-#     if platform.system() == 'Linux':
-#         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-#     else:
-#         fourcc = cv2.VideoWriter_fourcc(*'PIM1')
-#     [height, width] = video_tensor[0].shape[0:2]
-#     writer = cv2.VideoWriter(path + '_amp' + extra + '.avi', fourcc, fps, (width, height), 1)
-#     for i in range(video_tensor.shape[0]):
-#         writer.write(cv2.convertScaleAbs(video_tensor[i]))
-#     writer.release()
+def save_video(video_tensor, fps, filename, var):
+    """
+     Creates a new video for the output
+     :param video_tensor: filtered video sequence
+     :param fps: frame rate of original video
+     :param filename: input video name
+     :param var: variables used in EVM (alpha, cutoff, low, high, linearattenuation, chromattenuation)
+     """
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(
+        var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ').avi'
+    if platform.system() == 'Linux':
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    else:
+        fourcc = cv2.VideoWriter_fourcc(*'PIM1')
+    [height, width] = video_tensor[0].shape[0:2]
+    writer = cv2.VideoWriter(path + extra, fourcc, fps, (width, height), 1)
+    for i in range(video_tensor.shape[0]):
+        writer.write(cv2.convertScaleAbs(video_tensor[i]))
+    writer.release()
+    return extra
+
+
+"""
 def save_video(video_tensor, fps, filename):
     '''
     Creates a new video for the output
@@ -332,6 +336,8 @@ def save_video(video_tensor, fps, filename):
     for i in range(video_tensor.shape[0]):
         writer.write(cv2.convertScaleAbs(video_tensor[i]))
     writer.release()
+"""
+
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -342,40 +348,40 @@ def uploaded_file(filename):
     linearAttenuation = 1
     chromAttenuation = 1
 
-    # var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
+    var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
 
     print("File Submission Clicked")
     print("Loading Video...")
     start = time.time()
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     end = time.time()
-    print("Video Loaded in " + str(end-start) +" seconds\n")
+    print("Video Loaded in " + str(end - start) + " seconds\n")
 
     print("Calculating Laplacian Pyramid")
     start = time.time()
     t = rgb2yiq(t)
     levels = calculate_pyramid_levels(width, height)
     end = time.time()
-    print("Laplacian Pyramid Calculated in " + str(end-start) + " seconds\n")
+    print("Laplacian Pyramid Calculated in " + str(end - start) + " seconds\n")
 
     print("Creating Laplacian Video")
     start = time.time()
     lap_video_list = laplacian_video_pyramid(t, levels)
     end = time.time()
-    print("Laplacian Video created in " + str(end-start) + " seconds\n")
+    print("Laplacian Video created in " + str(end - start) + " seconds\n")
 
     print("Applying Butterworth Filter")
     start = time.time()
     filtered_video_list = apply_butter(lap_video_list, levels, alpha, cutoff, low, high, fps, width, height,
                                        linearAttenuation)
     end = time.time()
-    print("Butterworth Filter Applied in " + str(end-start) + " seconds\n")
+    print("Butterworth Filter Applied in " + str(end - start) + " seconds\n")
 
     print("Reconstructing Video")
     start = time.time()
     final = reconstruct(filtered_video_list, levels)
     end = time.time()
-    print("Video Reconstructed in " + str(end-start) + " seconds\n")
+    print("Video Reconstructed in " + str(end - start) + " seconds\n")
 
     # chromatic attenuation
     final[:][:][:][1] *= chromAttenuation
@@ -392,7 +398,7 @@ def uploaded_file(filename):
     final[final > 255] = 255
 
     print("Saving Video")
-    save_video(final, fps, filename)
+    extra = save_video(final, fps, filename, var)
     print("Video Saved!!!")
 
     # Convert uploaded image to Black and White - REMOVE
@@ -401,7 +407,7 @@ def uploaded_file(filename):
     # image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename + "Out.avi", as_attachment=True)
+                               filename + extra, as_attachment=True)
 
 
 if __name__ == '__main__':
