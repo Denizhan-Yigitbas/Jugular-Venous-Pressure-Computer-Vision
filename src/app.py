@@ -47,7 +47,18 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file', filename=filename))
+            return redirect(
+                url_for(
+                    'uploaded_file',
+                    filename=filename,
+                    alpha=request.form['alpha'],
+                    cutoff=request.form['cutoff'],
+                    low=request.form['low'],
+                    high=request.form['high'],
+                    linearAttenuation=request.form['linearAttenuation'],
+                    chromAttenuation=request.form['chromAttenuation'],
+                )
+            )
     return render_template('upload.html', no_file_selected=False)
 
 
@@ -341,12 +352,18 @@ def save_video(video_tensor, fps, filename):
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    alpha = 10
-    cutoff = 16
-    low = 0.83
-    high = 1
-    linearAttenuation = 1
-    chromAttenuation = 1
+    print(request.form)
+
+    alpha = float(request.args.get('alpha'))
+    cutoff = float(request.args.get('cutoff'))
+    low = float(request.args.get('low'))
+    high = float(request.args.get('high'))
+    linearAttenuation = float(request.args.get('linearAttenuation'))
+    chromAttenuation = float(request.args.get('chromAttenuation'))
+
+    print(f"Alpha = {alpha}\nCutOff = {cutoff}\nLow = {low}\n"
+          f"High = {high}\nLinearAttenuation = {linearAttenuation}\n"
+          f"ChromaticAttenuation = {chromAttenuation}\n")
 
     var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
 

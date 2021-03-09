@@ -27,7 +27,8 @@ form p{
   color: #A9A9A9;
   font-family: Arial;
 }
-form input{
+
+.file-input{
   position: absolute;
   margin: 0;
   padding: 0;

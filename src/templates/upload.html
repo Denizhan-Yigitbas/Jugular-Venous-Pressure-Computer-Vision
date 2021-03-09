@@ -63,8 +63,33 @@
 </script>
 <h1>Eulerian Magnification for Jugular Venous Pressure</h1>
 <form method=post enctype=multipart/form-data>
-  <input type="file" name=file>
+  <input type="file" name=file class="file-input">
   <p>Drag your files here or click in this area</p>
+
+  <label>Alpha:
+    <input type="text" name="alpha" value="10">
+  </label><br><br>
+
+  <label>Cutoff:
+    <input type="text" name="cutoff" value="16">
+  </label><br><br>
+
+  <label>Low Frequency:
+    <input type="text" name="low" value="0.83">
+  </label><br>
+
+  <label>High Frequency:
+    <input type="text" name="high" value="1">
+  </label><br><br>
+
+  <label>Linear Attenuation:
+    <input type="text" name="linearAttenuation" value="1">
+  </label><br><br>
+
+  <label>Chromatic Attenuation:
+    <input type="text" name="chromAttenuation" value="1">
+  </label><br><br>
+
   <button type="submit" value="Upload">Upload</button>
 </form>
 
