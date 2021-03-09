@@ -352,8 +352,6 @@ def save_video(video_tensor, fps, filename):
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    print(request.form)
-
     alpha = float(request.args.get('alpha'))
     cutoff = float(request.args.get('cutoff'))
     low = float(request.args.get('low'))
