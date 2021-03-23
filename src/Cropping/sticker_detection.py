@@ -121,9 +121,9 @@ def sticker_detection_plot(filename):
     blobs = cv2.drawKeypoints(im_orig, keypoints, np.array([]), (255, 0, 0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     # Show blobs
-    #cv2.imshow("Filtering Red Stickers", blobs)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+    cv2.imshow("Filtering Red Stickers", blobs)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     return diameters
 
@@ -138,8 +138,8 @@ def pxl_to_dist(sticker_diameter, pixel_diameter):
     return ratio
 
 
-diameter = sticker_detection_plot(file)
-print(pxl_to_dist(1, diameter[4]))
+#diameter = sticker_detection_plot(file)
+#print(pxl_to_dist(1, diameter[4]))
 
 # [263.0073547363281, 238.82835388183594, 371.4798278808594, 161.4182891845703, 155.4551239013672, 216.84242248535156]
 # [(1408.520751953125, 1496.6676025390625), (989.9877319335938, 1175.0413818359375), (923.7012329101562, 774.256103515625), (1518.4801025390625, 669.0260009765625), (192.65757751464844, 422.47564697265625), (1488.2816162109375, 107.33660125732422)]
