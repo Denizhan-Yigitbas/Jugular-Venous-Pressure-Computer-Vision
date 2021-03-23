@@ -64,8 +64,9 @@ def magnify(vidFile, outDir, alpha, level, fl, fh,
 
     # Write Output Video (amplified)
     # outName = video_name(vidFile, outDir, alpha, level, fl, fh)
-    outName = "/Users/sang-hyunlee/Desktop/output4.mp4"
-
+    # outName = "/Users/sang-hyunlee/Desktop/output4.mp4"
+    outName = outDir # "output.mp4"  # outDir + "output.mp4"
+    print("Output filepath:", outName)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # account for any video format
     vidOut = cv2.VideoWriter(outName, fourcc, fr, (vidWidth, vidHeight))
 
