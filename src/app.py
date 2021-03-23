@@ -376,7 +376,7 @@ def uploaded_file(filename):
     print("Video Loaded in " + str(end - start) + " seconds\n")
 
     # Find the coordinates based on stickers to crop the videos
-    min_x, min_y, max_x, max_y, diameter = sticker_detection_coords(video_stack=t)
+    min_x, min_y, max_x, max_y, _ = sticker_detection_coords(video_stack=t)
 
     # TODO: Video preprocessing
     # Insert calls to the circle finding code here to identify cropping targets
@@ -390,7 +390,7 @@ def uploaded_file(filename):
     )
 
     # Find the scale (ratio) between pixel distance & real distance using sticker (unit: inches/pixels)
-    scale = pxl_to_dist(sticker_diameter=1, pixel_diameter=diameter)
+    #scale = pxl_to_dist(sticker_diameter=1, pixel_diameter=diameter)
 
     print("Calculating Laplacian Pyramid")
     start = time.time()

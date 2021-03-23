@@ -38,11 +38,11 @@ def sticker_detection_coords(video_stack):
     diameters = []
 
     # Iterate through each frame of video and find the x,y coordinates of
-    for i in range(len(video_stack)):
+    for i in range(1):
 
         frame = video_stack[i]
 
-        im = frame.copy()
+        im = (frame.copy()).astype('uint8')
 
         # Erosion to filter
         _, im = cv2.threshold(im, 128, 255, cv2.THRESH_BINARY)
@@ -59,10 +59,10 @@ def sticker_detection_coords(video_stack):
             diameters.append(keypoints[j].size)
 
     # Find min_x, min_y, max_x, max_y for cropping whole video
-    min_x = min(xycoord, key=lambda t: t[0])[0]
-    min_y = min(xycoord, key=lambda t: t[1])[1]
-    max_x = max(xycoord, key=lambda t: t[0])[0]
-    max_y = max(xycoord, key=lambda t: t[1])[1]
+    min_x = int(min(xycoord, key=lambda t: t[0])[0])
+    min_y = int(min(xycoord, key=lambda t: t[1])[1])
+    max_x = int(max(xycoord, key=lambda t: t[0])[0])
+    max_y = int(max(xycoord, key=lambda t: t[1])[1])
 
     # Find diameter of neck sticker on first frame (add if detected == 3?)
     diameter = diameters[1]
@@ -73,6 +73,8 @@ def sticker_detection_coords(video_stack):
 def sticker_detection_plot(filename):
     # Load image
     im = cv2.imread(filename, cv2.IMREAD_COLOR)
+
+    print(im.shape)
 
     # Erode the image (filtering)
     im_orig = im
