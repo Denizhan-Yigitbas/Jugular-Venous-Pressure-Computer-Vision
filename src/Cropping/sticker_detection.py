@@ -35,6 +35,7 @@ def sticker_detection_coords(video_stack):
 
     # Initialize array for tuples of x,y coordinates
     xycoord = []
+    diameters = []
 
     # Iterate through each frame of video and find the x,y coordinates of
     for i in range(len(video_stack)):
@@ -55,6 +56,7 @@ def sticker_detection_coords(video_stack):
         # Find the center points of each sticker
         for j in range(len(keypoints)):
             xycoord.append((keypoints[j].pt[0], keypoints[j].pt[1]))
+            diameters.append(keypoints[j].size)
 
     # Find min_x, min_y, max_x, max_y for cropping whole video
     min_x = min(xycoord, key=lambda t: t[0])[0]
@@ -62,7 +64,10 @@ def sticker_detection_coords(video_stack):
     max_x = max(xycoord, key=lambda t: t[0])[0]
     max_y = max(xycoord, key=lambda t: t[1])[1]
 
-    return min_x, min_y, max_x, max_y
+    # Find diameter of neck sticker on first frame (add if detected == 3?)
+    diameter = diameters[1]
+
+    return min_x, min_y, max_x, max_y, diameter
 
 
 def sticker_detection_plot(filename):
@@ -105,6 +110,7 @@ def sticker_detection_plot(filename):
 
     # Find the center points of each sticker & indicate with small black circles
     xycoord = []
+    diameters = []
 
     for idx in range(len(keypoints)):
         xycoord.append((keypoints[idx].pt[0], keypoints[idx].pt[1]))
@@ -121,4 +127,17 @@ def sticker_detection_plot(filename):
     return
 
 
+def pxl_to_dist(sticker_diameter, pixel_diameter):
+    """
+    To automatically calculate the distance scale, we find a ratio (unit: inches/pixels) of the sticker diameter (in inches) to sticker diameter (in pixels)
+    """
+
+    ratio = sticker_diameter / pixel_diameter
+
+    return ratio
+
+
 sticker_detection_plot(file)
+
+# [263.0073547363281, 238.82835388183594, 371.4798278808594, 161.4182891845703, 155.4551239013672, 216.84242248535156]
+# [(1408.520751953125, 1496.6676025390625), (989.9877319335938, 1175.0413818359375), (923.7012329101562, 774.256103515625), (1518.4801025390625, 669.0260009765625), (192.65757751464844, 422.47564697265625), (1488.2816162109375, 107.33660125732422)]
