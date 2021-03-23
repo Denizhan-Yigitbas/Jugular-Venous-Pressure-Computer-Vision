@@ -86,16 +86,7 @@ def load_video(vidFile):
 
     vid.release()
 
-    # TODO: Video preprocessing
-    # Insert calls to the circle finding code here to identify cropping targets
-    # Fallback (in the event no/partial circles identified) should be base video bounds
-    new_video_stack, new_vid_width, new_vid_height = crop_video(
-        video_stack,
-        vidWidth // 4, vidHeight // 4,
-        3 * vidWidth // 4, 3 * vidHeight // 4
-    )
-
-    return new_video_stack, fr, new_vid_width, new_vid_height
+    return video_stack, fr, vidWidth, vidHeight
 
 
 def rgb2yiq(video):
@@ -382,6 +373,17 @@ def uploaded_file(filename):
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     end = time.time()
     print("Video Loaded in " + str(end - start) + " seconds\n")
+
+    # TODO: Video preprocessing
+    # Insert calls to the circle finding code here to identify cropping targets
+    # Fallback (in the event no/partial circles identified) should be base video bounds
+    t, width, height = crop_video(
+        video_stack=t,
+        min_x=width // 4,
+        min_y=height // 4,
+        max_x=3 * width // 4,
+        max_y=3 * height // 4,
+    )
 
     print("Calculating Laplacian Pyramid")
     start = time.time()
