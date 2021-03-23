@@ -1,20 +1,15 @@
 
-import cv2
-import numpy as np
 
-
-def crop_video(video, min_x, min_y, max_x, max_y):
+def crop_video(video_stack, min_x, min_y, max_x, max_y):
     """
     Opens the provided video (cv2.VideoCapture object) and extracts the frame data
     into a numpy array, cropping each frame at the provided coordinates.
     """
-    # Some characteristics from the original video
-    w_frame = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h_frame = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    # Get base height and width
+    h_frame = video_stack.shape[1]
+    w_frame = video_stack.shape[2]
 
-    fps = int(video.get(cv2.CAP_PROP_FPS))
-    frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-
+    # validate new height and width
     h, w = max_y - min_y, max_x - min_x
 
     if w_frame <= w:
@@ -25,16 +20,7 @@ def crop_video(video, min_x, min_y, max_x, max_y):
         min_y, max_y = 0, h_frame - 1
         h = h_frame
 
-    # Initialize frame data array
-    video_stack = np.empty((frames, h, w, 3))
+    # Crop video array
+    new_video_stack = video_stack[:, min_y:max_y, min_x:max_x]
 
-    for x in range(frames):
-        ret, frame = video.read()
-
-        # Save the cropped frame
-        video_stack[x] = frame[min_y:max_y, min_x:max_x]
-
-        if not ret:
-            break
-
-    return video_stack, fps, w, h
+    return new_video_stack, w, h

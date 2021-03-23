@@ -71,25 +71,31 @@ def load_video(vidFile):
     :return: video sequence, frame rate, width & height of video frames
     '''
     vid = cv2.VideoCapture(vidFile)
-    # fr = vid.get(cv2.CAP_PROP_FPS)  # frame rate
-    # len = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+    fr = vid.get(cv2.CAP_PROP_FPS)  # frame rate
+    len = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
     vidWidth = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     vidHeight = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # save video as stack of images
+    video_stack = np.empty((len, vidHeight, vidWidth, 3))
+
+    for x in range(len):
+        ret, frame = vid.read()
+
+        video_stack[x] = frame
+
+    vid.release()
 
     # TODO: Video preprocessing
     # Insert calls to the circle finding code here to identify cropping targets
     # Fallback (in the event no/partial circles identified) should be base video bounds
-    video_stack, fr, vidWidth, vidHeight = crop_video(
-        video=vid,
-        min_x=0,
-        min_y=0,
-        max_x=vidWidth,
-        max_y=vidHeight,
+    new_video_stack, new_vid_width, new_vid_height = crop_video(
+        video_stack,
+        vidWidth // 4, vidHeight // 4,
+        3 * vidWidth // 4, 3 * vidHeight // 4
     )
 
-    vid.release()
-
-    return video_stack, fr, vidWidth, vidHeight
+    return new_video_stack, fr, new_vid_width, new_vid_height
 
 
 def rgb2yiq(video):
