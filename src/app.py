@@ -10,6 +10,8 @@ from flask import Flask, flash, request, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 from PIL import Image
 
+from EVM_Python.crop_video import crop_video
+
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
 if not os.path.isdir(target):
@@ -69,18 +71,21 @@ def load_video(vidFile):
     :return: video sequence, frame rate, width & height of video frames
     '''
     vid = cv2.VideoCapture(vidFile)
-    fr = vid.get(cv2.CAP_PROP_FPS)  # frame rate
-    len = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+    # fr = vid.get(cv2.CAP_PROP_FPS)  # frame rate
+    # len = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
     vidWidth = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     vidHeight = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    # save video as stack of images
-    video_stack = np.empty((len, vidHeight, vidWidth, 3))
-
-    for x in range(len):
-        ret, frame = vid.read()
-
-        video_stack[x] = frame
+    # TODO: Video preprocessing
+    # Insert calls to the circle finding code here to identify cropping targets
+    # Fallback (in the event no/partial circles identified) should be base video bounds
+    video_stack, fr, vidWidth, vidHeight = crop_video(
+        video=vid,
+        min_x=0,
+        min_y=0,
+        max_x=vidWidth,
+        max_y=vidHeight,
+    )
 
     vid.release()
 
@@ -320,7 +325,7 @@ def save_video(video_tensor, fps, filename, var):
     if platform.system() == 'Linux':
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     else:
-        fourcc = cv2.VideoWriter_fourcc(*'PIM1')
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     [height, width] = video_tensor[0].shape[0:2]
     writer = cv2.VideoWriter(path + extra, fourcc, fps, (width, height), 1)
     for i in range(video_tensor.shape[0]):
