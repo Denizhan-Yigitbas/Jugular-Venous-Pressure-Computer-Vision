@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 
 from EVM_Python.crop_video import crop_video
+from Cropping.sticker_detection import sticker_detection_coords
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -374,15 +375,18 @@ def uploaded_file(filename):
     end = time.time()
     print("Video Loaded in " + str(end - start) + " seconds\n")
 
+    # Find the coordinates based on stickers to crop the videos
+    min_x, min_y, max_x, max_y = sticker_detection_coords(video_stack=t)
+
     # TODO: Video preprocessing
     # Insert calls to the circle finding code here to identify cropping targets
     # Fallback (in the event no/partial circles identified) should be base video bounds
     t, width, height = crop_video(
         video_stack=t,
-        min_x=width // 4,
-        min_y=height // 4,
-        max_x=3 * width // 4,
-        max_y=3 * height // 4,
+        min_x=min_x,
+        min_y=min_y,
+        max_x=max_x,
+        max_y=max_y,
     )
 
     print("Calculating Laplacian Pyramid")
