@@ -24,6 +24,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'mp4'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+CROPPING_MARGIN = 50
+
 
 # check if selected file is verified
 def allowed_file(filename):
@@ -377,6 +379,11 @@ def uploaded_file(filename):
 
     # Find the coordinates based on stickers to crop the videos
     min_x, min_y, max_x, max_y, _ = sticker_detection_coords(video_stack=t)
+
+    min_x = max(min_x - CROPPING_MARGIN, 0)
+    min_y = max(min_y - CROPPING_MARGIN, 0)
+    max_x = min(max_x + CROPPING_MARGIN, width)
+    max_y = min(max_y + CROPPING_MARGIN, height)
 
     # TODO: Video preprocessing
     # Insert calls to the circle finding code here to identify cropping targets
