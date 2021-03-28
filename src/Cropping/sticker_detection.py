@@ -3,8 +3,6 @@ import numpy as np
 from itertools import combinations
 
 
-
-
 def sticker_detection_coords(video_stack):
     """
         For an input frame of video, detects red stickers (circle/oval), finds the center x,y coordinates of each sticker in each
@@ -122,9 +120,9 @@ def sticker_detection_plot(filename):
     blobs = cv2.drawKeypoints(im_orig, keypoints, np.array([]), (255, 0, 0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     # Show blobs
-    #cv2.imshow("Filtering Red Stickers", blobs)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+    cv2.imshow("Filtering Red Stickers", blobs)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     return np.array(diameters), np.array(xycoord)
 
@@ -151,7 +149,7 @@ def calc_distance(pxl_ratio, coords):
     coord_pairs = []
     for coords in coord_combo:
         [[x1, y1], [x2, y2]] = coords
-        distance = pxl_ratio*np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+        distance = pxl_ratio * np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
         distances.append(distance)
         coord_pairs.append(coords)
 
