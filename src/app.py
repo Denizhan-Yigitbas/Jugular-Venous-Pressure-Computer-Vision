@@ -377,6 +377,8 @@ def uploaded_file(filename):
     end = time.time()
     print("Video Loaded in " + str(end - start) + " seconds\n")
 
+    print("Cropping Video...")
+    start = time.time()
     # Find the coordinates based on stickers to crop the videos
     min_x, min_y, max_x, max_y, radii = sticker_detection_coords_2(video_stack=t)
 
@@ -395,6 +397,8 @@ def uploaded_file(filename):
         max_x=max_x,
         max_y=max_y,
     )
+    end = time.time()
+    print("Video cropped in " + str(end - start) + " seconds\n")
 
     # Find the scale (ratio) between pixel distance & real distance using sticker (unit: inches/pixels)
     #scale = pxl_to_dist(sticker_diameter=1, pixel_diameter=diameter)

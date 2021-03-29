@@ -237,7 +237,7 @@ ax.bar(x_pos - 0.175, [6.875, 6.375, 6.375], width=0.35, label='Actual')
 ax.set_ylabel('Distance (inches)')
 ax.set_xticks(x_pos)
 ax.set_xticklabels(pairs)
-ax.set_title('Comparison between real-distance and scaled pixel distance: stationary object')
+ax.set_title('Comparison between real-distance and scaled pixel distance: stationary object (n=5)')
 ax.set_ylim([0, 8])
 ax.legend()
 
