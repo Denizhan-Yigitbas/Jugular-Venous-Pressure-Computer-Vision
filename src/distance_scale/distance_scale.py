@@ -137,9 +137,9 @@ def sticker_detection_2(filename):
             radii.append(circles[idx][2])
             coords.append((circles[idx][0], circles[idx][1]))
 
-    cv2.imshow('frame', im_orig)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    #cv2.imshow('frame', im_orig)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
 
     return radii, coords
 
@@ -250,31 +250,31 @@ def scale_human_exp():
     # Experiment 1: three red stickers on paper, 10 inches away
     file1 = '/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg'
     radii1, coords1 = sticker_detection_2(file1)
-    pxl_ratio1 = (1 / 2) / radii1[0]
+    pxl_ratio1 = 0.437 / radii1[0]
     dist1a, dist1b, dist1c = calc_distance_stat(pxl_ratio1, coords1)
 
     # Experiment 2: three red stickers on paper, 20 inches away
     file2 = '/Users/sang-hyunlee/Desktop/JVP pics/human2.jpg'
     radii2, coords2 = sticker_detection_2(file2)
-    pxl_ratio2 = (1 / 2) / radii2[0]
+    pxl_ratio2 = 0.437 / radii2[0]
     dist2a, dist2b, dist2c = calc_distance_stat(pxl_ratio2, coords2)
 
     # Experiment 3: three red stickers on paper, 30 inches away
     file3 = '/Users/sang-hyunlee/Desktop/JVP pics/human3.jpg'
     radii3, coords3 = sticker_detection_2(file3)
-    pxl_ratio3 = (1 / 2) / radii3[0]
+    pxl_ratio3 = 0.437 / radii3[0]
     dist3a, dist3b, dist3c = calc_distance_stat(pxl_ratio3, coords3)
 
     # Experiment 4: three red stickers on paper, 40 inches away
     file4 = '/Users/sang-hyunlee/Desktop/JVP pics/human4.jpg'
     radii4, coords4 = sticker_detection_2(file4)
-    pxl_ratio4 = (1 / 2) / radii4[0]
+    pxl_ratio4 = 0.437 / radii4[0]
     dist4a, dist4b, dist4c = calc_distance_stat(pxl_ratio4, coords4)
 
     # Experiment 5: three red stickers on paper, 50 inches away
     file5 = '/Users/sang-hyunlee/Desktop/JVP pics/human5.jpg'
     radii5, coords5 = sticker_detection_2(file5)
-    pxl_ratio5 = (1 / 2) / radii5[0]
+    pxl_ratio5 = 0.437 / radii5[0]
     dist5a, dist5b, dist5c = calc_distance_stat(pxl_ratio5, coords5)
 
     # Plotting the results for stationary stickers
@@ -297,16 +297,17 @@ def scale_human_exp():
 
     fig, ax = plt.subplots()
     ax.bar(x_pos + 0.175, CTEs, yerr=error, alpha=0.5, width=0.35, ecolor='black', capsize=10, label='Scaled')
-    ax.bar(x_pos - 0.175, [6.875, 6.375, 6.375], width=0.35, label='Actual')
+    ax.bar(x_pos - 0.175, [5.5, 6.5, 8], width=0.35, label='Actual')
     ax.set_ylabel('Distance (inches)')
     ax.set_xticks(x_pos)
     ax.set_xticklabels(pairs)
-    ax.set_title('Comparison between real-distance and scaled pixel distance: stationary object (n=5)')
-    ax.set_ylim([0, 8])
+    ax.set_title('Comparison between real-distance and scaled pixel distance: on human (n=5)')
+    ax.set_ylim([0, 10])
     ax.legend()
 
-    plt.savefig('scale_plot_stationary.png')
+    plt.savefig('scale_plot_human.png')
     plt.show()
 
 
-#sticker_detection_2('/Users/sang-hyunlee/Desktop/humanextra.jpeg')
+#sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
+#scale_human_exp()

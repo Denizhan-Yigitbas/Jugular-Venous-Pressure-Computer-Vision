@@ -4,12 +4,22 @@ import scipy.signal
 import wave
 
 
-def find_peaks(signal):
+def find_peaks(signal, f_rate):
     # Unique peaks must have at least a separation of this many samples
     peak_sep = 10000
 
+    sos = scipy.signal.butter(
+        N=100,
+        Wn=[2000, 2200],
+        btype='bandpass',
+        fs=f_rate,
+        output='sos',
+    )
+
+    filtered = scipy.signal.sosfilt(sos, signal)
+
     # Convert to positive signal and compute the minimum peak height
-    sig_abs = np.abs(signal)
+    sig_abs = np.abs(filtered)
     threshold = np.max(sig_abs) // 2
 
     # Calculate the peak indices
@@ -30,15 +40,17 @@ def find_peaks_from_file(path):
     signal = raw.readframes(-1)
     signal = np.frombuffer(signal, dtype="int16")
 
-    return find_peaks(signal)
+    f_rate = raw.getframerate()
+
+    return find_peaks(signal, f_rate)
 
 
-def mark_video(vid_array, audio_arr):
+def mark_video(vid_array, audio_arr, f_rate):
     # Size of black square, in pixels
     square_size = 15
 
     # Get the peaks
-    peaks = find_peaks(audio_arr)
+    peaks = find_peaks(audio_arr, f_rate)
 
     for ind in peaks:
 
