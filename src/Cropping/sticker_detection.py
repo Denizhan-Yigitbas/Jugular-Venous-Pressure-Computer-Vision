@@ -105,7 +105,8 @@ def sticker_detection_coords_2(video_stack):
         output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 
         # Use the Hough transform to detect circles in the image
-        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200)
+        #circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200) for stationary
+        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 200, param1=100, param2=18, minRadius=5, maxRadius=60)
 
         # If we have extracted a circle, draw an outline
         # We only need to detect one circle here, since there will only be one reference object
