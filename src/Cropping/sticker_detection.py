@@ -85,10 +85,10 @@ def sticker_detection_coords_2(video_stack):
         # Red color mask: issue with missing red points
         img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-        lower1 = np.array([0, 155, 100], dtype="uint8")  # Use 100 for the third, for stationary
+        lower1 = np.array([0, 155, 160], dtype="uint8")  # Use 100 for the third, for stationary
         upper1 = np.array([10, 255, 255], dtype="uint8")
 
-        lower2 = np.array([170, 155, 100], dtype="uint8")
+        lower2 = np.array([170, 155, 160], dtype="uint8")
         upper2 = np.array([179, 255, 255], dtype="uint8")
 
         mask1 = cv2.inRange(img_hsv, lower1, upper1)
@@ -105,7 +105,8 @@ def sticker_detection_coords_2(video_stack):
         output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 
         # Use the Hough transform to detect circles in the image
-        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200)
+        #circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200) for stationary
+        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 200, param1=100, param2=18, minRadius=5, maxRadius=60)
 
         # If we have extracted a circle, draw an outline
         # We only need to detect one circle here, since there will only be one reference object
