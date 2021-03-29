@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 
 from EVM_Python.crop_video import crop_video
-from Cropping.sticker_detection import sticker_detection_coords, pxl_to_dist
+from Cropping.sticker_detection import sticker_detection_coords, pxl_to_dist, sticker_detection_coords_2
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -378,7 +378,7 @@ def uploaded_file(filename):
     print("Video Loaded in " + str(end - start) + " seconds\n")
 
     # Find the coordinates based on stickers to crop the videos
-    min_x, min_y, max_x, max_y, _ = sticker_detection_coords(video_stack=t)
+    min_x, min_y, max_x, max_y, radii = sticker_detection_coords_2(video_stack=t)
 
     min_x = max(min_x - CROPPING_MARGIN, 0)
     min_y = max(min_y - CROPPING_MARGIN, 0)

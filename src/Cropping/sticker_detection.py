@@ -71,51 +71,50 @@ def sticker_detection_coords(video_stack):
 
 def sticker_detection_coords_2(video_stack):
 
-    # Iterate through each frame of videostack
-    for
-    # Load image
-    im = cv2.imread(filename, cv2.IMREAD_COLOR)
-    im_orig = im
-
-    # Red color mask: issue with missing red points
-    img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-
-    lower1 = np.array([0, 155, 100], dtype="uint8")  # Use 100 for the third, for stationary
-    upper1 = np.array([10, 255, 255], dtype="uint8")
-
-    lower2 = np.array([170, 155, 100], dtype="uint8")
-    upper2 = np.array([179, 255, 255], dtype="uint8")
-
-    mask1 = cv2.inRange(img_hsv, lower1, upper1)
-    mask2 = cv2.inRange(img_hsv, lower2, upper2)
-
-    output = cv2.bitwise_and(im, im, mask=(mask1 | mask2))
-
-    # captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([0, 150, 150]), np.array([10, 255, 255]))
-
-    # Second blur to reduce more noise, easier circle detection
-    output = cv2.GaussianBlur(output, (5, 5), 2, 2)
-
-    output = cv2.cvtColor(output, cv2.COLOR_HSV2BGR)
-    output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-
-    # Use the Hough transform to detect circles in the image
-    circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200)
-
     # Initialize empty list for radius and center coordinates of each circle
     radii = []
     coords = []
 
-    # If we have extracted a circle, draw an outline
-    # We only need to detect one circle here, since there will only be one reference object
-    if circles is not None:
-        circles = np.round(circles[0, :]).astype("int")
-        circles = sorted(circles, key=lambda x: x[0])
-        for idx in range(len(circles)):
-            cv2.circle(im_orig, center=(circles[idx][0], circles[idx][1]), radius=circles[idx][2], color=(0, 255, 0),
-                       thickness=5)
-            radii.append(circles[idx][2])
-            coords.append((circles[idx][0], circles[idx][1]))
+    # Iterate through each frame of videostack
+    for i in range(len(video_stack)):
+
+        # Load each frame
+        frame = video_stack[i]
+        im = (frame.copy()).astype('uint8')
+
+        # Red color mask: issue with missing red points
+        img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+
+        lower1 = np.array([0, 155, 100], dtype="uint8")  # Use 100 for the third, for stationary
+        upper1 = np.array([10, 255, 255], dtype="uint8")
+
+        lower2 = np.array([170, 155, 100], dtype="uint8")
+        upper2 = np.array([179, 255, 255], dtype="uint8")
+
+        mask1 = cv2.inRange(img_hsv, lower1, upper1)
+        mask2 = cv2.inRange(img_hsv, lower2, upper2)
+
+        output = cv2.bitwise_and(im, im, mask=(mask1 | mask2))
+
+        # captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([0, 150, 150]), np.array([10, 255, 255]))
+
+        # Second blur to reduce more noise, easier circle detection
+        output = cv2.GaussianBlur(output, (5, 5), 2, 2)
+
+        output = cv2.cvtColor(output, cv2.COLOR_HSV2BGR)
+        output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+
+        # Use the Hough transform to detect circles in the image
+        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200)
+
+        # If we have extracted a circle, draw an outline
+        # We only need to detect one circle here, since there will only be one reference object
+        if circles is not None:
+            circles = np.round(circles[0, :]).astype("int")
+            circles = sorted(circles, key=lambda x: x[0])
+            for idx in range(len(circles)):
+                radii.append(circles[idx][2])
+                coords.append((circles[idx][0], circles[idx][1]))
 
     # Find min_x, min_y, max_x, max_y for cropping whole video
     min_x = int(min(coords, key=lambda t: t[0])[0])
@@ -123,7 +122,7 @@ def sticker_detection_coords_2(video_stack):
     max_x = int(max(coords, key=lambda t: t[0])[0])
     max_y = int(max(coords, key=lambda t: t[1])[1])
 
-    return min_x, min_y, max_x, max_y,
+    return min_x, min_y, max_x, max_y, radii
 
 
 def sticker_detection_plot(filename):
