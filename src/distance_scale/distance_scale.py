@@ -100,16 +100,16 @@ def sticker_detection_2(filename):
     # Red color mask: issue with missing red points
     img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-    lower1 = np.array([0, 155, 100], dtype="uint8")  # Use 100 for the third, for stationary
-    upper1 = np.array([10, 255, 255], dtype="uint8")
+    lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+    upper1 = np.array([90, 255, 255], dtype="uint8")
 
-    lower2 = np.array([170, 155, 100], dtype="uint8")
+    lower2 = np.array([170, 100, 100], dtype="uint8")
     upper2 = np.array([179, 255, 255], dtype="uint8")
 
     mask1 = cv2.inRange(img_hsv, lower1, upper1)
-    mask2 = cv2.inRange(img_hsv, lower2, upper2)
+    #mask2 = cv2.inRange(img_hsv, lower2, upper2)
 
-    output = cv2.bitwise_and(im, im, mask=(mask1 | mask2))
+    output = cv2.bitwise_and(im, im, mask=mask1)
 
     # captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([0, 150, 150]), np.array([10, 255, 255]))
 
@@ -120,7 +120,7 @@ def sticker_detection_2(filename):
     output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 
     # Use the Hough transform to detect circles in the image
-    circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200)
+    circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=10, maxRadius=300)
 
     # Initialize empty list for radius and center coordinates of each circle
     radii = []
@@ -132,14 +132,14 @@ def sticker_detection_2(filename):
         circles = np.round(circles[0, :]).astype("int")
         circles = sorted(circles, key=lambda x: x[0])
         for idx in range(len(circles)):
-            cv2.circle(im_orig, center=(circles[idx][0], circles[idx][1]), radius=circles[idx][2], color=(0, 255, 0),
+            cv2.circle(im_orig, center=(circles[idx][0], circles[idx][1]), radius=circles[idx][2], color=(0, 0, 255),
                        thickness=5)
             radii.append(circles[idx][2])
             coords.append((circles[idx][0], circles[idx][1]))
 
-    # cv2.imshow('frame', im_orig)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    cv2.imshow('frame', im_orig)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     return radii, coords
 
@@ -183,66 +183,130 @@ def calc_distance_stat(pxl_ratio, coords):
 # Distance between circle 1 and 2: 6.75 inches
 # Distance between circle
 
-# Experiment 1: three red stickers on paper, 10 inches away
-file1 = '/Users/sang-hyunlee/Desktop/sticker1.jpeg'
-radii1, coords1 = sticker_detection_2(file1)
-pxl_ratio1 = (1/2) / radii1[0]
-dist1a, dist1b, dist1c = calc_distance_stat(pxl_ratio1, coords1)
+def scale_stat_exp():
+    # Experiment 1: three red stickers on paper, 10 inches away
+    file1 = '/Users/sang-hyunlee/Desktop/JVP pics/sticker1.jpeg'
+    radii1, coords1 = sticker_detection_2(file1)
+    pxl_ratio1 = (1 / 2) / radii1[0]
+    dist1a, dist1b, dist1c = calc_distance_stat(pxl_ratio1, coords1)
 
-# Experiment 2: three red stickers on paper, 20 inches away
-file2 = '/Users/sang-hyunlee/Desktop/sticker2.jpeg'
-radii2, coords2 = sticker_detection_2(file2)
-pxl_ratio2 = (1/2) / radii2[0]
-dist2a, dist2b, dist2c = calc_distance_stat(pxl_ratio2, coords2)
+    # Experiment 2: three red stickers on paper, 20 inches away
+    file2 = '/Users/sang-hyunlee/Desktop/JVP pics/sticker2.jpeg'
+    radii2, coords2 = sticker_detection_2(file2)
+    pxl_ratio2 = (1 / 2) / radii2[0]
+    dist2a, dist2b, dist2c = calc_distance_stat(pxl_ratio2, coords2)
 
-# Experiment 3: three red stickers on paper, 30 inches away
-file3 = '/Users/sang-hyunlee/Desktop/sticker3.jpeg'
-radii3, coords3 = sticker_detection_2(file3)
-pxl_ratio3 = (1/2) / radii3[0]
-dist3a, dist3b, dist3c = calc_distance_stat(pxl_ratio3, coords3)
+    # Experiment 3: three red stickers on paper, 30 inches away
+    file3 = '/Users/sang-hyunlee/Desktop/JVP pics/sticker3.jpeg'
+    radii3, coords3 = sticker_detection_2(file3)
+    pxl_ratio3 = (1 / 2) / radii3[0]
+    dist3a, dist3b, dist3c = calc_distance_stat(pxl_ratio3, coords3)
 
-# Experiment 4: three red stickers on paper, 40 inches away
-file4 = '/Users/sang-hyunlee/Desktop/sticker4.jpeg'
-radii4, coords4 = sticker_detection_2(file4)
-pxl_ratio4 = (1/2) / radii4[0]
-dist4a, dist4b, dist4c = calc_distance_stat(pxl_ratio4, coords4)
+    # Experiment 4: three red stickers on paper, 40 inches away
+    file4 = '/Users/sang-hyunlee/Desktop/JVP pics/sticker4.jpeg'
+    radii4, coords4 = sticker_detection_2(file4)
+    pxl_ratio4 = (1 / 2) / radii4[0]
+    dist4a, dist4b, dist4c = calc_distance_stat(pxl_ratio4, coords4)
 
-# Experiment 5: three red stickers on paper, 50 inches away
-file5 = '/Users/sang-hyunlee/Desktop/sticker5.jpeg'
-radii5, coords5 = sticker_detection_2(file5)
-pxl_ratio5 = (1/2) / radii5[0]
-dist5a, dist5b, dist5c = calc_distance_stat(pxl_ratio5, coords5)
+    # Experiment 5: three red stickers on paper, 50 inches away
+    file5 = '/Users/sang-hyunlee/Desktop/JVP pics/sticker5.jpeg'
+    radii5, coords5 = sticker_detection_2(file5)
+    pxl_ratio5 = (1 / 2) / radii5[0]
+    dist5a, dist5b, dist5c = calc_distance_stat(pxl_ratio5, coords5)
 
-# Plotting the results for stationary stickers
-dista = np.array([dist1a, dist2a, dist3a, dist4a, dist5a])
-distb = np.array([dist1b, dist2b, dist3b, dist4b, dist5b])
-distc = np.array([dist1c, dist2c, dist3c, dist4c, dist5c])
+    # Plotting the results for stationary stickers
+    dista = np.array([dist1a, dist2a, dist3a, dist4a, dist5a])
+    distb = np.array([dist1b, dist2b, dist3b, dist4b, dist5b])
+    distc = np.array([dist1c, dist2c, dist3c, dist4c, dist5c])
 
-dista_mean = np.mean(dista)
-distb_mean = np.mean(distb)
-distc_mean = np.mean(distc)
+    dista_mean = np.mean(dista)
+    distb_mean = np.mean(distb)
+    distc_mean = np.mean(distc)
 
-dista_std = np.std(dista)
-distb_std = np.std(distb)
-distc_std = np.std(distc)
+    dista_std = np.std(dista)
+    distb_std = np.std(distb)
+    distc_std = np.std(distc)
 
-pairs = ['A & B', 'B & C', 'A & C']
-x_pos = np.arange(len(pairs))
-CTEs = [dista_mean, distb_mean, distc_mean]
-error = [dista_std, distb_std, distc_std]
+    pairs = ['A & B', 'B & C', 'A & C']
+    x_pos = np.arange(len(pairs))
+    CTEs = [dista_mean, distb_mean, distc_mean]
+    error = [dista_std, distb_std, distc_std]
 
-fig, ax = plt.subplots()
-ax.bar(x_pos + 0.175, CTEs, yerr=error, alpha=0.5, width=0.35, ecolor='black', capsize=10, label='Scaled')
-ax.bar(x_pos - 0.175, [6.875, 6.375, 6.375], width=0.35, label='Actual')
-ax.set_ylabel('Distance (inches)')
-ax.set_xticks(x_pos)
-ax.set_xticklabels(pairs)
-ax.set_title('Comparison between real-distance and scaled pixel distance: stationary object (n=5)')
-ax.set_ylim([0, 8])
-ax.legend()
+    fig, ax = plt.subplots()
+    ax.bar(x_pos + 0.175, CTEs, yerr=error, alpha=0.5, width=0.35, ecolor='black', capsize=10, label='Scaled')
+    ax.bar(x_pos - 0.175, [6.875, 6.375, 6.375], width=0.35, label='Actual')
+    ax.set_ylabel('Distance (inches)')
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(pairs)
+    ax.set_title('Comparison between real-distance and scaled pixel distance: stationary object (n=5)')
+    ax.set_ylim([0, 8])
+    ax.legend()
 
-plt.savefig('scale_plot_stationary.png')
-plt.show()
+    plt.savefig('scale_plot_stationary.png')
+    plt.show()
 
 
-#ticker_detection_2(file1)
+def scale_human_exp():
+    # Experiment 1: three red stickers on paper, 10 inches away
+    file1 = '/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg'
+    radii1, coords1 = sticker_detection_2(file1)
+    pxl_ratio1 = (1 / 2) / radii1[0]
+    dist1a, dist1b, dist1c = calc_distance_stat(pxl_ratio1, coords1)
+
+    # Experiment 2: three red stickers on paper, 20 inches away
+    file2 = '/Users/sang-hyunlee/Desktop/JVP pics/human2.jpg'
+    radii2, coords2 = sticker_detection_2(file2)
+    pxl_ratio2 = (1 / 2) / radii2[0]
+    dist2a, dist2b, dist2c = calc_distance_stat(pxl_ratio2, coords2)
+
+    # Experiment 3: three red stickers on paper, 30 inches away
+    file3 = '/Users/sang-hyunlee/Desktop/JVP pics/human3.jpg'
+    radii3, coords3 = sticker_detection_2(file3)
+    pxl_ratio3 = (1 / 2) / radii3[0]
+    dist3a, dist3b, dist3c = calc_distance_stat(pxl_ratio3, coords3)
+
+    # Experiment 4: three red stickers on paper, 40 inches away
+    file4 = '/Users/sang-hyunlee/Desktop/JVP pics/human4.jpg'
+    radii4, coords4 = sticker_detection_2(file4)
+    pxl_ratio4 = (1 / 2) / radii4[0]
+    dist4a, dist4b, dist4c = calc_distance_stat(pxl_ratio4, coords4)
+
+    # Experiment 5: three red stickers on paper, 50 inches away
+    file5 = '/Users/sang-hyunlee/Desktop/JVP pics/human5.jpg'
+    radii5, coords5 = sticker_detection_2(file5)
+    pxl_ratio5 = (1 / 2) / radii5[0]
+    dist5a, dist5b, dist5c = calc_distance_stat(pxl_ratio5, coords5)
+
+    # Plotting the results for stationary stickers
+    dista = np.array([dist1a, dist2a, dist3a, dist4a, dist5a])
+    distb = np.array([dist1b, dist2b, dist3b, dist4b, dist5b])
+    distc = np.array([dist1c, dist2c, dist3c, dist4c, dist5c])
+
+    dista_mean = np.mean(dista)
+    distb_mean = np.mean(distb)
+    distc_mean = np.mean(distc)
+
+    dista_std = np.std(dista)
+    distb_std = np.std(distb)
+    distc_std = np.std(distc)
+
+    pairs = ['A & B', 'B & C', 'A & C']
+    x_pos = np.arange(len(pairs))
+    CTEs = [dista_mean, distb_mean, distc_mean]
+    error = [dista_std, distb_std, distc_std]
+
+    fig, ax = plt.subplots()
+    ax.bar(x_pos + 0.175, CTEs, yerr=error, alpha=0.5, width=0.35, ecolor='black', capsize=10, label='Scaled')
+    ax.bar(x_pos - 0.175, [6.875, 6.375, 6.375], width=0.35, label='Actual')
+    ax.set_ylabel('Distance (inches)')
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(pairs)
+    ax.set_title('Comparison between real-distance and scaled pixel distance: stationary object (n=5)')
+    ax.set_ylim([0, 8])
+    ax.legend()
+
+    plt.savefig('scale_plot_stationary.png')
+    plt.show()
+
+
+#sticker_detection_2('/Users/sang-hyunlee/Desktop/humanextra.jpeg')
