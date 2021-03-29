@@ -100,16 +100,16 @@ def sticker_detection_2(filename):
     # Red color mask: issue with missing red points
     img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-    lower1 = np.array([0, 100, 100], dtype="uint8")  # Use 100 for the third, for stationary
-    upper1 = np.array([10, 255, 255], dtype="uint8")
+    lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+    upper1 = np.array([90, 255, 255], dtype="uint8")
 
     lower2 = np.array([170, 100, 100], dtype="uint8")
     upper2 = np.array([179, 255, 255], dtype="uint8")
 
     mask1 = cv2.inRange(img_hsv, lower1, upper1)
-    mask2 = cv2.inRange(img_hsv, lower2, upper2)
+    #mask2 = cv2.inRange(img_hsv, lower2, upper2)
 
-    output = cv2.bitwise_and(im, im, mask=(mask1 | mask2))
+    output = cv2.bitwise_and(im, im, mask=mask1)
 
     # captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([0, 150, 150]), np.array([10, 255, 255]))
 
@@ -120,7 +120,7 @@ def sticker_detection_2(filename):
     output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 
     # Use the Hough transform to detect circles in the image
-    circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 500, param1=100, param2=18, minRadius=10, maxRadius=100)
+    circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=10, maxRadius=300)
 
     # Initialize empty list for radius and center coordinates of each circle
     radii = []
@@ -132,7 +132,7 @@ def sticker_detection_2(filename):
         circles = np.round(circles[0, :]).astype("int")
         circles = sorted(circles, key=lambda x: x[0])
         for idx in range(len(circles)):
-            cv2.circle(im_orig, center=(circles[idx][0], circles[idx][1]), radius=circles[idx][2], color=(0, 255, 0),
+            cv2.circle(im_orig, center=(circles[idx][0], circles[idx][1]), radius=circles[idx][2], color=(0, 0, 255),
                        thickness=5)
             radii.append(circles[idx][2])
             coords.append((circles[idx][0], circles[idx][1]))
@@ -309,4 +309,4 @@ def scale_human_exp():
     plt.show()
 
 
-sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
+#sticker_detection_2('/Users/sang-hyunlee/Desktop/humanextra.jpeg')
