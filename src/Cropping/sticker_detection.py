@@ -85,10 +85,10 @@ def sticker_detection_coords_2(video_stack):
         # Red color mask: issue with missing red points
         img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-        lower1 = np.array([0, 155, 100], dtype="uint8")  # Use 100 for the third, for stationary
+        lower1 = np.array([0, 155, 160], dtype="uint8")  # Use 100 for the third, for stationary
         upper1 = np.array([10, 255, 255], dtype="uint8")
 
-        lower2 = np.array([170, 155, 100], dtype="uint8")
+        lower2 = np.array([170, 155, 160], dtype="uint8")
         upper2 = np.array([179, 255, 255], dtype="uint8")
 
         mask1 = cv2.inRange(img_hsv, lower1, upper1)
