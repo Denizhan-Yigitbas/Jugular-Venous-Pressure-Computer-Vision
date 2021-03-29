@@ -31,3 +31,28 @@ def find_peaks_from_file(path):
     signal = np.frombuffer(signal, dtype="int16")
 
     return find_peaks(signal)
+
+
+def mark_video(vid_array, audio_arr):
+    # Size of black square, in pixels
+    square_size = 15
+
+    # Get the peaks
+    peaks = find_peaks(audio_arr)
+
+    for ind in peaks:
+
+        # Calculate the bounds for the square to be marked out
+        min_frame = max(0, ind - 5)
+        max_frame = min(vid_array.shape[0], ind + 5)
+
+        min_y = 0
+        max_y = min(square_size, vid_array.shape[1])
+
+        min_x = max(0, vid_array.shape[2] - 1 - square_size)
+        max_x = vid_array.shape[2] - 1
+
+        # Black out specified region
+        vid_array[min_frame:max_frame, min_y:max_y, min_x:max_x, :] = 0
+
+    return vid_array
