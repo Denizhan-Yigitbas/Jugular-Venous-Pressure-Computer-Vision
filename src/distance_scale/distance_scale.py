@@ -29,7 +29,7 @@ class LineBuilder:
             self.line.figure.canvas.draw()
             self.distance = math.sqrt((self.xs[0] - self.xs[1]) ** 2 + (self.ys[0] - self.ys[1]) ** 2)
             self.inches = self.distance * self.ratio
-            ax.annotate(f'Line distance is {self.inches} pixels', xy=(260, 20), xycoords='figure pixels')
+            ax.annotate(f'Line distance is {round(self.inches,2)} inches', xy=(260, 20), xycoords='figure pixels')
             plt.savefig('testimage.png')
             ax.set_title('Click anywhere on the image to exit')
         if len(self.xs) == 3:
@@ -343,11 +343,12 @@ def scale_human_exp():
 
 def draw_line_on_image(filename):
     radii, coords = sticker_detection_2(filename)
+    print(radii, coords)
     pxl_ratio1 = 0.437 / radii[0]
     im = image.imread(filename)
     global fig, ax
     fig, ax = plt.subplots()
-    ax.set_title('click to build line segments')
+    ax.set_title('Click at Top of JVP and on the Left of the Sternum Circle')
     line, = ax.plot([0], [0])  # empty line
 
     frame1 = plt.gca()
@@ -375,4 +376,4 @@ def draw_line_on_image(filename):
 # sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
 # scale_human_exp()
 
-draw_line_on_image('/Users/joshuakowal/Downloads/bball1.jpeg')
+# draw_line_on_image('/Users/joshuakowal/Downloads/im_from_p4.png')
