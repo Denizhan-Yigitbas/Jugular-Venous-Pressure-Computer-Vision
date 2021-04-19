@@ -301,7 +301,7 @@ def scale_human_exp():
     ax.set_ylabel('Distance (inches)')
     ax.set_xticks(x_pos)
     ax.set_xticklabels(pairs)
-    ax.set_title('Comparison between real-distance and scaled pixel distance: on human (n=5)')
+    ax.set_title('Comparison between real-distance and\nscaled pixel distance: on human (n=5)')
     ax.set_ylim([0, 10])
     ax.legend()
 
