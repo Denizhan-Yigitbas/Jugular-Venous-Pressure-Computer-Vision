@@ -9,8 +9,9 @@ import heapq
 
 
 class LineBuilder:
-    def __init__(self, line):
+    def __init__(self, line, ratio):
         self.line = line
+        self.ratio = ratio
         self.xs = list(line.get_xdata())
         self.ys = list(line.get_ydata())
         self.xs.pop()
@@ -27,7 +28,7 @@ class LineBuilder:
             self.line.set_data(self.xs, self.ys)
             self.line.figure.canvas.draw()
             self.distance = math.sqrt((self.xs[0] - self.xs[1]) ** 2 + (self.ys[0] - self.ys[1]) ** 2)
-            ax.annotate(f'Line distance is {self.distance} pixels', xy=(260, 20), xycoords='figure pixels')
+            ax.annotate(f'Line distance is {self.distance * self.ratio} pixels', xy=(260, 20), xycoords='figure pixels')
             plt.savefig('testimage.png')
             ax.set_title('Click anywhere on the image to exit')
         if len(self.xs) == 3:
@@ -340,6 +341,8 @@ def scale_human_exp():
 
 
 def draw_line_on_image(filename):
+    radii, coords = sticker_detection_2(filename)
+    pxl_ratio1 = 0.437 / radii[0]
     im = image.imread(filename)
     global fig, ax
     fig, ax = plt.subplots()
@@ -358,7 +361,7 @@ def draw_line_on_image(filename):
     for tick in frame1.axes.get_yticklines():
         tick.set_visible(False)
 
-    linebuilder = LineBuilder(line)
+    linebuilder = LineBuilder(line, pxl_ratio1)
 
     plt.imshow(im)
     plt.show()
