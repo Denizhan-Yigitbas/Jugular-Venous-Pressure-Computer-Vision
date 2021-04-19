@@ -28,7 +28,8 @@ class LineBuilder:
             self.line.set_data(self.xs, self.ys)
             self.line.figure.canvas.draw()
             self.distance = math.sqrt((self.xs[0] - self.xs[1]) ** 2 + (self.ys[0] - self.ys[1]) ** 2)
-            ax.annotate(f'Line distance is {self.distance * self.ratio} pixels', xy=(260, 20), xycoords='figure pixels')
+            self.inches = self.distance * self.ratio
+            ax.annotate(f'Line distance is {self.inches} pixels', xy=(260, 20), xycoords='figure pixels')
             plt.savefig('testimage.png')
             ax.set_title('Click anywhere on the image to exit')
         if len(self.xs) == 3:
@@ -366,10 +367,10 @@ def draw_line_on_image(filename):
     plt.imshow(im)
     plt.show()
 
-    x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.distance
+    x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.inches
     print(f"The first point's coordinates are ({x[0]}, {y[0]}).")
     print(f"The second point's coordinates are ({x[1]}, {y[1]}).")
-    print(f"The line's distance is {round(d,2)} pixels.")
+    print(f"The line's distance is {round(d,2)} inches.")
 
 # sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
 # scale_human_exp()
