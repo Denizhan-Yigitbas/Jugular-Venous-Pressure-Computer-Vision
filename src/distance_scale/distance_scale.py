@@ -1,9 +1,39 @@
 from itertools import combinations
 
 import matplotlib.pyplot as plt
+from matplotlib import image
 import cv2
 import numpy as np
+import math
 import heapq
+
+
+class LineBuilder:
+    def __init__(self, line):
+        self.line = line
+        self.xs = list(line.get_xdata())
+        self.ys = list(line.get_ydata())
+        self.xs.pop()
+        self.ys.pop()
+        self.cid = line.figure.canvas.mpl_connect('button_press_event', self)
+        self.distance = 0
+
+    def __call__(self, event):
+        # print('click', event)
+        if event.inaxes != self.line.axes: return
+        self.xs.append(event.xdata)
+        self.ys.append(event.ydata)
+        if len(self.xs) == 2:
+            self.line.set_data(self.xs, self.ys)
+            self.line.figure.canvas.draw()
+            self.distance = math.sqrt((self.xs[0] - self.xs[1]) ** 2 + (self.ys[0] - self.ys[1]) ** 2)
+            ax.annotate(f'Line distance is {self.distance} pixels', xy=(260, 20), xycoords='figure pixels')
+            plt.savefig('testimage.png')
+            ax.set_title('Click anywhere on the image to exit')
+        if len(self.xs) == 3:
+            self.xs.pop()
+            self.ys.pop()
+            plt.close(fig)
 
 
 def sticker_detection_plot(filename):
@@ -107,7 +137,7 @@ def sticker_detection_2(filename):
     upper2 = np.array([179, 255, 255], dtype="uint8")
 
     mask1 = cv2.inRange(img_hsv, lower1, upper1)
-    #mask2 = cv2.inRange(img_hsv, lower2, upper2)
+    # mask2 = cv2.inRange(img_hsv, lower2, upper2)
 
     output = cv2.bitwise_and(im, im, mask=mask1)
 
@@ -137,9 +167,9 @@ def sticker_detection_2(filename):
             radii.append(circles[idx][2])
             coords.append((circles[idx][0], circles[idx][1]))
 
-    #cv2.imshow('frame', im_orig)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
+    # cv2.imshow('frame', im_orig)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return radii, coords
 
@@ -309,5 +339,36 @@ def scale_human_exp():
     plt.show()
 
 
-#sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
-#scale_human_exp()
+def draw_line_on_image(filename):
+    im = image.imread(filename)
+    global fig, ax
+    fig, ax = plt.subplots()
+    ax.set_title('click to build line segments')
+    line, = ax.plot([0], [0])  # empty line
+
+    frame1 = plt.gca()
+    for xlabel_i in frame1.axes.get_xticklabels():
+        xlabel_i.set_visible(False)
+        xlabel_i.set_fontsize(0.0)
+    for xlabel_i in frame1.axes.get_yticklabels():
+        xlabel_i.set_fontsize(0.0)
+        xlabel_i.set_visible(False)
+    for tick in frame1.axes.get_xticklines():
+        tick.set_visible(False)
+    for tick in frame1.axes.get_yticklines():
+        tick.set_visible(False)
+
+    linebuilder = LineBuilder(line)
+
+    plt.imshow(im)
+    plt.show()
+
+    x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.distance
+    print(f"The first point's coordinates are ({x[0]}, {y[0]}).")
+    print(f"The second point's coordinates are ({x[1]}, {y[1]}).")
+    print(f"The line's distance is {round(d,2)} pixels.")
+
+# sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
+# scale_human_exp()
+
+draw_line_on_image('/Users/joshuakowal/Downloads/bball1.jpeg')
