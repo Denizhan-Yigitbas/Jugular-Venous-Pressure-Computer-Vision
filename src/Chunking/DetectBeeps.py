@@ -5,6 +5,9 @@ import moviepy.editor as mp
 import copy
 from scipy.io import wavfile
 from multiprocessing import Process, Semaphore
+from scipy.io import wavfile
+from scipy.signal import spectrogram
+import scipy.signal as sig
 
 
 def video2audio(path, wav_output):
@@ -28,6 +31,24 @@ def find_fft(path2file, timestep=1/60, chan=0):
     freq_hz = freq * 1 / timestep
 
     return fft_arry, freq_hz, data, fs
+
+def filter_noise(audio_array, fs, N=8, rp=5, Wn=[120000,13000], btype='bandpass', output='sos')
+    """
+    
+    :param time_series: audio numpy array
+    :param fs: sampling frequency
+    :param N: filter order
+    :param rp: maximum ripples below unity gain
+    :param Wn: frequency range scalar or range
+    :param btype: type of filter {‘lowpass’, ‘highpass’, ‘bandpass’, ‘bandstop’},
+    :param output: type of filter output {‘ba’, ‘zpk’, ‘sos’}
+    :return: filtered_audio : numpy array
+    """
+    sos = sig.cheby1(N, rp, Wn, btype=btype, fs=fs, output=output)
+    filtered_audio = sig.sosfilt(sos, audio_array)
+    return filtered_audio
+
+
 
 def remove_beeps(freq_hz, fft_arry, og_data, beep_tone=1000, fwindow_len =250):
     """
@@ -94,11 +115,13 @@ if __name__ == "__main__":
     root = "/Users/royphillips/Documents/Rice/elec494/S21/test_videos/"
     path1 = root + "/red_dots_sound.mp4"
     path2 = root + "/Stationaries/black_background.mov"
+    path3 = root + "/Humans/video3.mov"
     testroot = root + 'wav_testing/'
     wav_output = testroot + "output_audio.wav"
+    testroot1 = testroot + 'Humans/'
     wav_test_output = testroot + "test_output.wav"
 
-    my_video = video2audio(path1, wav_output)
+    my_video = video2audio(path3, wav_output)
 
     chan = 0
     fft_arry, freq_hz, data, fs = find_fft(wav_output, chan=chan)
@@ -106,4 +129,9 @@ if __name__ == "__main__":
     mid_idx, chunked = remove_beeps(freq_hz, fft_arry, data.T[chan, :])
 
     # split video clip
-    write_chunks(my_video, mid_idx, fs,testroot)
+    write_chunks(my_video, mid_idx, fs, testroot1)
+
+
+my_video = mp.VideoFileClip(path)
+my_video.write_videofile(output_path, fps=60, bitrate="4000k",
+                             threads=1, preset='ultrafast', codec='h264')
