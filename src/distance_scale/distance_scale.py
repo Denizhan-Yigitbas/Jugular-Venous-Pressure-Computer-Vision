@@ -369,8 +369,8 @@ def draw_line_on_image(filename):
     plt.show()
 
     x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.inches
-    print(f"The first point's coordinates are ({x[0]}, {y[0]}).")
-    print(f"The second point's coordinates are ({x[1]}, {y[1]}).")
+    print(f"The first point's coordinates are ({round(x[0],2)}, {round(y[0],2)}).")
+    print(f"The second point's coordinates are ({round(x[1],2)}, {round(y[1],2)}).")
     print(f"The line's distance is {round(d,2)} inches.")
 
 # sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
