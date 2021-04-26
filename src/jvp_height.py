@@ -134,12 +134,6 @@ def draw_line_on_image(frame):
 
     linebuilder = LineBuilder(line, pxl_ratio1)
 
-    plt.imshow(frame)
-    plt.show()
-
-    x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.inches
-    print(f"The first point's coordinates are ({round(x[0], 2)}, {round(y[0], 2)}).")
-    print(f"The second point's coordinates are ({round(x[1], 2)}, {round(y[1], 2)}).")
-    print(f"The line's distance is {round(d, 2)} inches.")
+    ax.imshow(frame)
 
 
