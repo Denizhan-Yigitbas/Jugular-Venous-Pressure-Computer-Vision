@@ -12,6 +12,7 @@ from PIL import Image
 
 from EVM_Python.crop_video import crop_video
 from Cropping.sticker_detection import sticker_detection_coords, pxl_to_dist, sticker_detection_coords_2
+from jvp_height import draw_line_on_image
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -65,6 +66,48 @@ def upload_file():
                 )
             )
     return render_template('upload.html', no_file_selected=False)
+
+
+@app.route('/get-height/', methods=['GET', 'POST'])
+def upload_jvp_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            # TODO: What is this doing?
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            # TODO: Think about this?
+            # flash('No selected file')
+            # return redirect(request.url)
+            return render_template('measure_jvp.html', no_file_selected=True)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(
+                url_for(
+                    'measure_jvp',
+                    filename=filename,
+                    frame_num=request.form['frame_num'],
+                )
+            )
+    return render_template('measure_jvp.html', no_file_selected=False)
+
+
+@app.route('/get-height/uploads/<filename>')
+def measure_jvp(filename):
+
+    video_stack, _, _, _ = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    frame_num = request.args.get('frame_num')
+    frame = video_stack[frame_num]
+
+    draw_line_on_image(frame)
+
+
+    return render_template('measure_jvp.html', no_file_selected=True)
 
 
 def load_video(vidFile):
@@ -329,10 +372,15 @@ def save_video(video_tensor, fps, filename, var):
     [height, width] = video_tensor[0].shape[0:2]
     writer = cv2.VideoWriter(path + extra, fourcc, fps, (width, height), 1)
     for i in range(video_tensor.shape[0]):
-        writer.write(cv2.convertScaleAbs(video_tensor[i]))
+
+        frame = cv2.convertScaleAbs(video_tensor[i])
+
+        frame = cv2.putText(frame, str(i), (300, 50), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
+
+        writer.write(frame)
+
     writer.release()
     return extra
-
 
 """
 def save_video(video_tensor, fps, filename):
@@ -452,8 +500,11 @@ def uploaded_file(filename):
     # image_file = image_file.convert('1') # convert image to black and white
     # image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename + extra, as_attachment=True)
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        filename + extra,
+        as_attachment=True
+    )
 
 
 if __name__ == '__main__':
