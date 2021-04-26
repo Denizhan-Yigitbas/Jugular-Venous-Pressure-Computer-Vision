@@ -84,7 +84,7 @@ def upload_jvp_file():
             # flash('No selected file')
             # return redirect(request.url)
             return render_template('measure_jvp.html', no_file_selected=True)
-        if file and allowed_file(file.filename):
+        if file:
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(
@@ -101,7 +101,7 @@ def upload_jvp_file():
 def measure_jvp(filename):
 
     video_stack, _, _, _ = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    frame_num = request.args.get('frame_num')
+    frame_num = int(request.args.get('frame_num'))
     frame = video_stack[frame_num]
 
     draw_line_on_image(frame)
