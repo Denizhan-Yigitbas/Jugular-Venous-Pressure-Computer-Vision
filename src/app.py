@@ -332,7 +332,7 @@ def save_video(video_tensor, fps, filename, var):
 
         frame = cv2.convertScaleAbs(video_tensor[i])
 
-        frame = cv2.putText(frame, str(i), (200, 5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
+        frame = cv2.putText(frame, str(i), (300, 50), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
 
         writer.write(frame)
 
