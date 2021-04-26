@@ -12,6 +12,7 @@ from PIL import Image
 
 from EVM_Python.crop_video import crop_video
 from Cropping.sticker_detection import sticker_detection_coords, pxl_to_dist, sticker_detection_coords_2
+from jvp_height import draw_line_on_image
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -99,18 +100,14 @@ def upload_jvp_file():
 @app.route('/get-height/uploads/<filename>')
 def measure_jvp(filename):
 
-    # TODO: add other stuff
+    video_stack, _, _, _ = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    frame_num = request.args.get('frame_num')
+    frame = video_stack[frame_num]
 
-    pass
-
-    return send_from_directory(
-        app.config['UPLOAD_FOLDER'],
-        filename,
-        as_attachment=True
-    )
+    draw_line_on_image(frame)
 
 
-
+    return render_template('measure_jvp.html', no_file_selected=True)
 
 
 def load_video(vidFile):

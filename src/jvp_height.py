@@ -146,7 +146,3 @@ def draw_line_on_image(frame):
     print(f"The line's distance is {round(d, 2)} inches.")
 
 
-video_stack, _, _, _ = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-frame = video_stack[i] # i is the index number inputted by Rohan
-draw_line_on_image(frame)
-
