@@ -67,6 +67,52 @@ def upload_file():
     return render_template('upload.html', no_file_selected=False)
 
 
+@app.route('/get-height/', methods=['GET', 'POST'])
+def upload_jvp_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            # TODO: What is this doing?
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            # TODO: Think about this?
+            # flash('No selected file')
+            # return redirect(request.url)
+            return render_template('measure_jvp.html', no_file_selected=True)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(
+                url_for(
+                    'measure_jvp',
+                    filename=filename,
+                    frame_num=request.form['frame_num'],
+                )
+            )
+    return render_template('measure_jvp.html', no_file_selected=False)
+
+
+@app.route('/get-height/uploads/<filename>')
+def measure_jvp(filename):
+
+    # TODO: add other stuff
+
+    pass
+
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        filename,
+        as_attachment=True
+    )
+
+
+
+
+
 def load_video(vidFile):
     '''
     Reads the video
@@ -452,8 +498,11 @@ def uploaded_file(filename):
     # image_file = image_file.convert('1') # convert image to black and white
     # image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename + extra, as_attachment=True)
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        filename + extra,
+        as_attachment=True
+    )
 
 
 if __name__ == '__main__':
