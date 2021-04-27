@@ -1,9 +1,9 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib import image
 import cv2
 import numpy as np
 import math
-import os
 
 
 def load_video(vidFile):
@@ -31,9 +31,10 @@ def load_video(vidFile):
     return video_stack, fr, vidWidth, vidHeight
 
 
-def sticker_detection_3(im):
-    # Load image
-    # im = cv2.imread(filename, cv2.IMREAD_COLOR)
+def sticker_detection_3(frame):
+
+    im = (frame.copy()).astype('uint8')
+
     im_orig = im
 
     # Red color mask: issue with missing red points
@@ -42,11 +43,7 @@ def sticker_detection_3(im):
     lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
     upper1 = np.array([90, 255, 255], dtype="uint8")
 
-    lower2 = np.array([170, 100, 100], dtype="uint8")
-    upper2 = np.array([179, 255, 255], dtype="uint8")
-
     mask1 = cv2.inRange(img_hsv, lower1, upper1)
-    # mask2 = cv2.inRange(img_hsv, lower2, upper2)
 
     output = cv2.bitwise_and(im, im, mask=mask1)
 
@@ -137,12 +134,6 @@ def draw_line_on_image(frame):
 
     linebuilder = LineBuilder(line, pxl_ratio1)
 
-    plt.imshow(frame)
-    plt.show()
-
-    x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.inches
-    print(f"The first point's coordinates are ({round(x[0], 2)}, {round(y[0], 2)}).")
-    print(f"The second point's coordinates are ({round(x[1], 2)}, {round(y[1], 2)}).")
-    print(f"The line's distance is {round(d, 2)} inches.")
+    ax.imshow(frame)
 
 
