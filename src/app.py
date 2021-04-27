@@ -13,6 +13,8 @@ from PIL import Image
 from EVM_Python.crop_video import crop_video
 from Cropping.sticker_detection import sticker_detection_coords, pxl_to_dist, sticker_detection_coords_2
 from jvp_height import draw_line_on_image
+from Chunking.process_audio import mark_video, video2audio
+
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -370,7 +372,8 @@ def save_video(video_tensor, fps, filename, var):
     else:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     [height, width] = video_tensor[0].shape[0:2]
-    writer = cv2.VideoWriter(path + extra, fourcc, fps, (width, height), 1)
+    writer = cv2.VideoWriter(path[:-4] + extra, fourcc, fps, (width, height), 1)
+
     for i in range(video_tensor.shape[0]):
 
         frame = cv2.convertScaleAbs(video_tensor[i])
@@ -418,12 +421,18 @@ def uploaded_file(filename):
 
     var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
 
-    print("File Submission Clicked")
+    print("File Submission Clicked: " + filename)
     print("Loading Video...")
     start = time.time()
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     end = time.time()
     print("Video Loaded in " + str(end - start) + " seconds\n")
+
+    print("Extracting Audio")
+    start = time.time()
+    fs, audio_arr = video2audio(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    end = time.time()
+    print("Audio extracted in " + str(end-start)+" seconds")
 
     print("Cropping Video...")
     start = time.time()
@@ -477,6 +486,8 @@ def uploaded_file(filename):
     end = time.time()
     print("Video Reconstructed in " + str(end - start) + " seconds\n")
 
+    print("Color Processing")
+    start = time.time()
     # chromatic attenuation
     final[:][:][:][1] *= chromAttenuation
     final[:][:][:][2] *= chromAttenuation
@@ -490,6 +501,15 @@ def uploaded_file(filename):
     # Cutoff wrong values
     final[final < 0] = 0
     final[final > 255] = 255
+
+    end = time.time()
+    print("Color Processed in " + str(end-start) + " seconds")
+
+    print("Audio Processing")
+    start = time.time()
+    final = mark_video(final, audio_arr, fs, fps)
+    end = time.time()
+    print("Audio Processed in " + str(end - start) + " seconds")
 
     print("Saving Video")
     extra = save_video(final, fps, filename, var)
