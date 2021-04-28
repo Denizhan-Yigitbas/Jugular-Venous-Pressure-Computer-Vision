@@ -23,4 +23,12 @@ def crop_video(video_stack, min_x, min_y, max_x, max_y):
     # Crop video array
     new_video_stack = video_stack[:, min_y:max_y, min_x:max_x]
 
-    return new_video_stack, w, h
+    return new_video_stack, w, h, min_x, min_y
+
+
+def sticker_coord_calibration(one_coords_and_radii, min_x, min_y):
+
+    x_o = one_coords_and_radii[0]
+    y_o = one_coords_and_radii[1]
+
+    return tuple([x_o - min_x, y_o - min_y])

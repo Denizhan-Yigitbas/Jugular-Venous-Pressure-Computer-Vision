@@ -7,6 +7,8 @@ import numpy as np
 import math
 import heapq
 
+from src.EVM_Python.crop_video import sticker_coord_calibration
+
 
 class LineBuilder:
     def __init__(self, line, ratio):
@@ -29,7 +31,7 @@ class LineBuilder:
             self.line.figure.canvas.draw()
             self.distance = math.sqrt((self.xs[0] - self.xs[1]) ** 2 + (self.ys[0] - self.ys[1]) ** 2)
             self.inches = self.distance * self.ratio
-            ax.annotate(f'Line distance is {round(self.inches,2)} inches', xy=(260, 20), xycoords='figure pixels')
+            ax.annotate(f'Line distance is {round(self.inches, 2)} inches', xy=(260, 20), xycoords='figure pixels')
             plt.savefig('testimage.png')
             ax.set_title('Click anywhere on the image to exit')
         if len(self.xs) == 3:
@@ -178,10 +180,11 @@ def sticker_detection_2(filename):
 
 def pxl_to_dist(sticker_radius, pixel_radius):
     """
-    To automatically calculate the distance scale, we find a ratio (unit: inches/pixels) of the sticker diameter (in inches) to sticker diameter (in pixels)
+    To automatically calculate the distance scale, we find a ratio (unit: cm/pixels) of the sticker diameter (in cm) to sticker diameter (in pixels)
+    Input sticker_radius is in inches
     """
 
-    ratio = sticker_radius / pixel_radius
+    ratio = (sticker_radius * 2.45) / pixel_radius
 
     return ratio
 
@@ -369,9 +372,145 @@ def draw_line_on_image(filename):
     plt.show()
 
     x, y, d = linebuilder.xs, linebuilder.ys, linebuilder.inches
-    print(f"The first point's coordinates are ({round(x[0],2)}, {round(y[0],2)}).")
-    print(f"The second point's coordinates are ({round(x[1],2)}, {round(y[1],2)}).")
-    print(f"The line's distance is {round(d,2)} inches.")
+    print(f"The first point's coordinates are ({round(x[0], 2)}, {round(y[0], 2)}).")
+    print(f"The second point's coordinates are ({round(x[1], 2)}, {round(y[1], 2)}).")
+    print(f"The line's distance is {round(d, 2)} inches.")
+
+
+### DISTANCE SCALE ON VIDEO PART
+def sticker_detection_coords_frame(frame):
+    # Initialize empty list for radius and center coordinates of each circle
+    radii = []
+    coords = []
+
+    # Load each frame
+    im = (frame.copy()).astype('uint8')
+
+    # Green color mask
+    img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+
+    lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+    upper1 = np.array([90, 255, 255], dtype="uint8")
+
+    mask1 = cv2.inRange(img_hsv, lower1, upper1)
+
+    # output = cv2.bitwise_and(im, im, mask=(mask1 | mask2))
+    output = cv2.bitwise_and(im, im, mask=mask1)
+
+    # Second blur to reduce more noise, easier circle detection
+    output = cv2.GaussianBlur(output, (5, 5), 2, 2)
+
+    # cv2.imshow('output', output)
+    # cv2.waitKey(0)
+
+    output = cv2.cvtColor(output, cv2.COLOR_HSV2BGR)
+    output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+
+    # Use the Hough transform to detect circles in the image
+    circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=40, param2=18, minRadius=5, maxRadius=300)
+
+    # If we have extracted a circle, draw an outline
+    # We only need to detect one circle here, since there will only be one reference object
+    if circles is not None:
+        circles = np.round(circles[0, :]).astype("int")
+        circles = sorted(circles, key=lambda x: x[0])
+        for idx in range(len(circles)):
+            radii.append(circles[idx][2])
+            coords.append((circles[idx][0], circles[idx][1]))
+
+    return radii, coords
+
+
+def draw_scale_on_video(frame, radii, coords):
+    # ORDER BY Y INSTEAD OF X????
+
+    sternum = coords[2]
+
+    scale = pxl_to_dist(0.437, radii[0])
+
+    # Main line of scale
+    frame = cv2.line(frame, sternum, (sternum[0], 0), (255, 0, 0), 5)
+
+    # Scale ticks
+    # Find the number of ticks on the line
+    one_tick_length = round(1 / scale)  # 1 cm tick in pixel length, rounded to closest integer
+    line_length = sternum[1]
+    num_ticks = int(np.floor(line_length / one_tick_length))
+
+    # Draw ticks (1cm apart)
+    for idx in range(num_ticks):
+        tick_height = sternum[1] - (idx + 1) * one_tick_length
+        # Add each tick
+        frame = cv2.line(frame, (sternum[0] - 20, tick_height), (sternum[0] + 20, tick_height), (255, 0, 0), 5)
+
+        # Add line that reaches left of pic
+        frame = cv2.line(frame, (0, tick_height), (sternum[0] - 70, tick_height), (255, 0, 0), 1)
+
+        # Add label (? cm)
+        frame = cv2.putText(frame, str(idx + 1) + ' cm', (sternum[0] - 70, tick_height), cv2.FONT_HERSHEY_SIMPLEX,
+                            fontScale=0.5, color=(255, 255, 255), thickness=2)
+
+    cv2.imwrite('/Users/sang-hyunlee/Desktop/JVP pics/cropped_human_ticks.png', frame)
+
+
+def draw_scale_on_video2(frame, scale, sternum):
+    # Main line of scale
+    frame = cv2.line(frame, sternum, (sternum[0], 0), (255, 0, 0), 5)
+
+    # Scale ticks
+    # Find the number of ticks on the line
+    one_tick_length = round(1 / scale)  # 1 cm tick in pixel length, rounded to closest integer
+    line_length = sternum[1]
+    num_ticks = int(np.floor(line_length / one_tick_length))
+
+    # Draw ticks (1cm apart)
+    for idx in range(num_ticks):
+        tick_height = sternum[1] - (idx + 1) * one_tick_length
+        # Add each tick
+        frame = cv2.line(frame, (sternum[0] - 20, tick_height), (sternum[0] + 20, tick_height), (255, 0, 0), 5)
+
+        # Add line that reaches left of pic
+        frame = cv2.line(frame, (0, tick_height), (sternum[0] - 70, tick_height), (255, 0, 0), 1)
+
+        # Add label (? cm)
+        frame = cv2.putText(frame, str(idx + 1) + ' cm', (sternum[0] - 70, tick_height), cv2.FONT_HERSHEY_SIMPLEX,
+                            fontScale=0.5, color=(255, 255, 255), thickness=2)
+
+
+def average_sternum_position(coords_and_radius, min_x, min_y):
+
+    sternum_x = []
+    sternum_y = []
+
+    for stickers in coords_and_radius.keys():
+        sternum = sticker_coord_calibration(coords_and_radius[stickers][1], min_x, min_y)
+        sternum_x.append(sternum[0])
+        sternum_y.append(sternum[1])
+
+    avg_sternum_x = int(np.mean(sternum_x))
+    avg_sternum_y = int(np.mean(sternum_y))
+
+    return tuple([avg_sternum_x, avg_sternum_y])
+
+
+def average_jaw_radius(coords_and_radius):
+
+    jaw_radius = []
+
+    for stickers in coords_and_radius.keys():
+        jaw_r = coords_and_radius[stickers][0][2]
+        jaw_radius.append(jaw_r)
+
+    avg_jaw_radius = np.mean(jaw_radius)
+
+    return avg_jaw_radius
+
+    # cv2.imwrite('/Users/sang-hyunlee/Desktop/JVP pics/cropped_human_ticks.png', frame)
+
+# frame1 = cv2.imread('/Users/sang-hyunlee/Desktop/JVP pics/cropped_human.png')
+# radii, coords = sticker_detection_coords_frame(frame1)
+
+# draw_scale_on_video(frame1, radii, coords)
 
 # sticker_detection_2('/Users/sang-hyunlee/Desktop/JVP pics/human1.jpg')
 # scale_human_exp()

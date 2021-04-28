@@ -83,7 +83,8 @@ def mark_video(vid_array, audio_arr, f_audio, f_video):
         # print(min_frame,max_frame, min_y,max_y, min_x,max_x)
         vid_array[min_frame:max_frame, min_y:max_y, min_x:max_x, :] = 0
 
-    return vid_array
+    return vid_array, peaks
+
 
 def mark_video_in_time(vid_array, audio_arr, f_audio, f_video):
     # Size of black square, in pixels

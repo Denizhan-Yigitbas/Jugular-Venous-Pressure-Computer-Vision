@@ -10,11 +10,14 @@ from flask import Flask, flash, request, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 from PIL import Image
 
-from EVM_Python.crop_video import crop_video
-from Cropping.sticker_detection import sticker_detection_coords, pxl_to_dist, sticker_detection_coords_2
+from EVM_Python.crop_video import crop_video, sticker_coord_calibration
+from Cropping.sticker_detection import sticker_detection_coords, sticker_detection_coords_2
 from jvp_height import draw_line_on_image
 from Chunking.process_audio import mark_video, video2audio
+from distance_scale.distance_scale import sticker_detection_coords_frame, draw_scale_on_video, draw_scale_on_video2, \
+    pxl_to_dist
 
+from src.distance_scale.distance_scale import average_sternum_position, average_jaw_radius
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')
@@ -70,6 +73,7 @@ def upload_file():
     return render_template('upload.html', no_file_selected=False)
 
 
+"""
 @app.route('/get-height/', methods=['GET', 'POST'])
 def upload_jvp_file():
     if request.method == 'POST':
@@ -110,6 +114,7 @@ def measure_jvp(filename):
 
 
     return render_template('measure_jvp.html', no_file_selected=True)
+"""
 
 
 def load_video(vidFile):
@@ -356,7 +361,54 @@ def yiq2rgb(video):
     return t
 
 
-def save_video(video_tensor, fps, filename, var):
+"""
+# Places scale on each frame's sternal angle
+def save_video(video_tensor, fps, filename, var, beat_indexes, coords_and_radius, min_x, min_y):
+ 
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(
+        var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ').avi'
+    if platform.system() == 'Linux':
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    else:
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    [height, width] = video_tensor[0].shape[0:2]
+    writer = cv2.VideoWriter(path[:-4] + extra, fourcc, fps, (width, height), 1)
+
+    for i in range(video_tensor.shape[0]):
+
+        frame = cv2.convertScaleAbs(video_tensor[i])
+
+        # If frame lies between range of peaks, iterate and add distance scale
+        if beat_indexes[0] <= i <= beat_indexes[-1]:
+
+            if i in coords_and_radius.keys():
+
+                sternum = sticker_coord_calibration(coords_and_radius[i][1], min_x, min_y)
+                scale = pxl_to_dist(0.437, coords_and_radius[i][0][2])
+
+                draw_scale_on_video2(frame, scale, sternum)
+
+            else:
+                j = i - 1
+                while beat_indexes[0] <= j:
+                    if j in coords_and_radius.keys():
+                        sternum = sticker_coord_calibration(coords_and_radius[j][1], min_x, min_y)
+                        scale = pxl_to_dist(0.437, coords_and_radius[j][0][2])
+                        draw_scale_on_video2(frame, scale, sternum)
+                        break
+                    else:
+                        j -= 1
+
+        writer.write(frame)
+
+    writer.release()
+    return extra
+"""
+
+
+# Places scale on constant, average sternal angle position
+def save_video(video_tensor, fps, filename, var, beat_indexes, coords_and_radius, min_x, min_y):
     """
      Creates a new video for the output
      :param video_tensor: filtered video sequence
@@ -374,36 +426,22 @@ def save_video(video_tensor, fps, filename, var):
     [height, width] = video_tensor[0].shape[0:2]
     writer = cv2.VideoWriter(path[:-4] + extra, fourcc, fps, (width, height), 1)
 
+    sternum = average_sternum_position(coords_and_radius, min_x, min_y)
+    scale = pxl_to_dist(0.437, average_jaw_radius(coords_and_radius))
+
     for i in range(video_tensor.shape[0]):
 
         frame = cv2.convertScaleAbs(video_tensor[i])
 
-        frame = cv2.putText(frame, str(i), (300, 50), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1, color=(255, 0, 0), thickness=2)
+        # If frame lies between range of peaks, iterate and add distance scale
+        if beat_indexes[0] <= i <= beat_indexes[-1]:
+
+            draw_scale_on_video2(frame, scale, sternum)
 
         writer.write(frame)
 
     writer.release()
     return extra
-
-"""
-def save_video(video_tensor, fps, filename):
-    '''
-    Creates a new video for the output
-    :param video_tensor: filtered video sequence
-    :param fps: frame rate of original video
-    :param name: output video name
-    '''
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if platform.system()=='Linux':
-        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    else:
-        fourcc = cv2.VideoWriter_fourcc(*'PIM1')
-    [height, width] = video_tensor[0].shape[0:2]
-    writer = cv2.VideoWriter(path+"Out.avi", fourcc, fps, (width, height), 1)
-    for i in range(video_tensor.shape[0]):
-        writer.write(cv2.convertScaleAbs(video_tensor[i]))
-    writer.release()
-"""
 
 
 @app.route('/uploads/<filename>')
@@ -432,12 +470,12 @@ def uploaded_file(filename):
     start = time.time()
     fs, audio_arr = video2audio(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     end = time.time()
-    print("Audio extracted in " + str(end-start)+" seconds")
+    print("Audio extracted in " + str(end - start) + " seconds")
 
     print("Cropping Video...")
     start = time.time()
     # Find the coordinates based on stickers to crop the videos
-    min_x, min_y, max_x, max_y, radii = sticker_detection_coords_2(video_stack=t)
+    min_x, min_y, max_x, max_y, coords_radii = sticker_detection_coords_2(video_stack=t)
 
     min_x = max(min_x - CROPPING_MARGIN, 0)
     min_y = max(min_y - CROPPING_MARGIN, 0)
@@ -447,7 +485,7 @@ def uploaded_file(filename):
     # TODO: Video preprocessing
     # Insert calls to the circle finding code here to identify cropping targets
     # Fallback (in the event no/partial circles identified) should be base video bounds
-    t, width, height = crop_video(
+    t, width, height, min_x, min_y = crop_video(
         video_stack=t,
         min_x=min_x,
         min_y=min_y,
@@ -458,7 +496,7 @@ def uploaded_file(filename):
     print("Video cropped in " + str(end - start) + " seconds\n")
 
     # Find the scale (ratio) between pixel distance & real distance using sticker (unit: inches/pixels)
-    #scale = pxl_to_dist(sticker_diameter=1, pixel_diameter=diameter)
+    # scale = pxl_to_dist(sticker_diameter=1, pixel_diameter=diameter)
 
     print("Calculating Laplacian Pyramid")
     start = time.time()
@@ -503,17 +541,19 @@ def uploaded_file(filename):
     final[final > 255] = 255
 
     end = time.time()
-    print("Color Processed in " + str(end-start) + " seconds")
+    print("Color Processed in " + str(end - start) + " seconds")
 
     print("Audio Processing")
     start = time.time()
-    final = mark_video(final, audio_arr, fs, fps)
+    final, peaks = mark_video(final, audio_arr, fs, fps)
     end = time.time()
     print("Audio Processed in " + str(end - start) + " seconds")
 
-    print("Saving Video")
-    extra = save_video(final, fps, filename, var)
-    print("Video Saved!!!")
+    print("Saving and labeling Video")
+    start = time.time()
+    extra = save_video(final, fps, filename, var, peaks, coords_radii, min_x, min_y)
+    end = time.time()
+    print("Video Saved in " + str(end - start) + " seconds!!!")
 
     # Convert uploaded image to Black and White - REMOVE
     # image_file = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # open colour image

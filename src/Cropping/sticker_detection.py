@@ -75,6 +75,9 @@ def sticker_detection_coords_2(video_stack):
     radii = []
     coords = []
 
+    # Initialize empty dictionary for {index: [circle coordinates + radius]}
+    radii_coords = {}
+
     # Iterate through each frame of videostack
     for i in range(len(video_stack)):
 
@@ -105,16 +108,21 @@ def sticker_detection_coords_2(video_stack):
 
         # Use the Hough transform to detect circles in the image
         #circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=200) for stationary
-        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=18, minRadius=5, maxRadius=300)
+        circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=50, param2=18, minRadius=5, maxRadius=300)
 
+        circles = circles[0]
         # If we have extracted a circle, draw an outline
         # We only need to detect one circle here, since there will only be one reference object
-        if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
-            circles = sorted(circles, key=lambda x: x[0])
+        #if circles is not None:
+
+        if len(circles) == 3:
+            circles = np.round(circles).astype("int")
+            circles = sorted(circles, key=lambda x: x[1])
             for idx in range(len(circles)):
                 radii.append(circles[idx][2])
                 coords.append((circles[idx][0], circles[idx][1]))
+
+            radii_coords[i] = circles
 
     # Find min_x, min_y, max_x, max_y for cropping whole video
     min_x = int(min(coords, key=lambda t: t[0])[0])
@@ -122,7 +130,7 @@ def sticker_detection_coords_2(video_stack):
     max_x = int(max(coords, key=lambda t: t[0])[0])
     max_y = int(max(coords, key=lambda t: t[1])[1])
 
-    return min_x, min_y, max_x, max_y, radii
+    return min_x, min_y, max_x, max_y, radii_coords
 
 
 def sticker_detection_plot(filename):
@@ -191,6 +199,7 @@ def pxl_to_dist(sticker_diameter, pixel_diameter):
     ratio = sticker_diameter / pixel_diameter
 
     return ratio
+
 
 def calc_distance(pxl_ratio, coords):
     """
