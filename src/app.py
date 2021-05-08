@@ -68,6 +68,7 @@ def upload_file():
                     high=request.form['high'],
                     linearAttenuation=request.form['linearAttenuation'],
                     chromAttenuation=request.form['chromAttenuation'],
+                    color=request.form['radiocolor'],
                 )
             )
     return render_template('upload.html', no_file_selected=False)
