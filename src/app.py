@@ -454,6 +454,7 @@ def uploaded_file(filename):
     linearAttenuation = float(request.args.get('linearAttenuation'))
     chromAttenuation = float(request.args.get('chromAttenuation'))
     color = str(request.args.get('radiocolor'))
+    print(color)
 
     print(f"Alpha = {alpha}\nCutOff = {cutoff}\nLow = {low}\n"
           f"High = {high}\nLinearAttenuation = {linearAttenuation}\n"
