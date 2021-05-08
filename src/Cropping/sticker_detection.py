@@ -69,7 +69,7 @@ def sticker_detection_coords(video_stack):
     return min_x, min_y, max_x, max_y, diameter
 
 
-def sticker_detection_coords_2(video_stack):
+def sticker_detection_coords_2(c, video_stack):
 
     # Initialize empty list for radius and center coordinates of each circle
     radii = []
@@ -88,8 +88,12 @@ def sticker_detection_coords_2(video_stack):
         # Red color mask: issue with missing red points
         img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-        lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
-        upper1 = np.array([90, 255, 255], dtype="uint8")
+        if c == 'g':
+            lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+            upper1 = np.array([90, 255, 255], dtype="uint8")
+        else:  # c == 'b'
+            lower1 = np.array([110, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+            upper1 = np.array([130, 255, 255], dtype="uint8")
 
         #lower2 = np.array([170, 155, 160], dtype="uint8")
         #upper2 = np.array([179, 255, 255], dtype="uint8")

@@ -452,12 +452,13 @@ def uploaded_file(filename):
     high = float(request.args.get('high'))
     linearAttenuation = float(request.args.get('linearAttenuation'))
     chromAttenuation = float(request.args.get('chromAttenuation'))
+    color = str(request.args.get('radiocolor'))
 
     print(f"Alpha = {alpha}\nCutOff = {cutoff}\nLow = {low}\n"
           f"High = {high}\nLinearAttenuation = {linearAttenuation}\n"
           f"ChromaticAttenuation = {chromAttenuation}\n")
 
-    var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation]
+    var = [alpha, cutoff, low, high, linearAttenuation, chromAttenuation, color]
 
     print("File Submission Clicked: " + filename)
     print("Loading Video...")
@@ -475,7 +476,7 @@ def uploaded_file(filename):
     print("Cropping Video...")
     start = time.time()
     # Find the coordinates based on stickers to crop the videos
-    min_x, min_y, max_x, max_y, coords_radii = sticker_detection_coords_2(video_stack=t)
+    min_x, min_y, max_x, max_y, coords_radii = sticker_detection_coords_2(color, video_stack=t)
 
     min_x = max(min_x - CROPPING_MARGIN, 0)
     min_y = max(min_y - CROPPING_MARGIN, 0)
