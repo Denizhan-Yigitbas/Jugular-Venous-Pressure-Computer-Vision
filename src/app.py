@@ -68,7 +68,7 @@ def upload_file():
                     high=request.form['high'],
                     linearAttenuation=request.form['linearAttenuation'],
                     chromAttenuation=request.form['chromAttenuation'],
-                    color=request.form['radiocolor'],
+                    color=request.form['color'],
                 )
             )
     return render_template('upload.html', no_file_selected=False)
@@ -454,7 +454,6 @@ def uploaded_file(filename):
     high = float(request.args.get('high'))
     linearAttenuation = float(request.args.get('linearAttenuation'))
     chromAttenuation = float(request.args.get('chromAttenuation'))
-    print(color)
 
     print(f"Alpha = {alpha}\nCutOff = {cutoff}\nLow = {low}\n"
           f"High = {high}\nLinearAttenuation = {linearAttenuation}\n"
