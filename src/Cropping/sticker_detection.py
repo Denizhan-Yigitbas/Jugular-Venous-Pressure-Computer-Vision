@@ -92,8 +92,8 @@ def sticker_detection_coords_2(c, video_stack):
             lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
             upper1 = np.array([90, 255, 255], dtype="uint8")
         else:  # c == 1, corresponds to blue
-            lower1 = np.array([110, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
-            upper1 = np.array([130, 255, 255], dtype="uint8")
+            lower1 = np.array([100, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+            upper1 = np.array([140, 255, 255], dtype="uint8")
 
         #lower2 = np.array([170, 155, 160], dtype="uint8")
         #upper2 = np.array([179, 255, 255], dtype="uint8")
