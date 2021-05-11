@@ -447,7 +447,7 @@ def save_video(video_tensor, fps, filename, var, beat_indexes, coords_and_radius
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    color = request.args.get('radiocolor')
+    color = float(request.args.get('color'))
     alpha = float(request.args.get('alpha'))
     cutoff = float(request.args.get('cutoff'))
     low = float(request.args.get('low'))
