@@ -482,8 +482,17 @@ def average_sternum_position(coords_and_radius, min_x, min_y):
     sternum_x = []
     sternum_y = []
 
+    """
+    # Order by pixel y coordinate (2nd one for sternum)
     for stickers in coords_and_radius.keys():
         sternum = sticker_coord_calibration(coords_and_radius[stickers][1], min_x, min_y)
+        sternum_x.append(sternum[0])
+        sternum_y.append(sternum[1])
+    """
+
+    # Order by pixel x coordinate (3rd one for sternum)
+    for stickers in coords_and_radius.keys():
+        sternum = sticker_coord_calibration(coords_and_radius[stickers][2], min_x, min_y)
         sternum_x.append(sternum[0])
         sternum_y.append(sternum[1])
 

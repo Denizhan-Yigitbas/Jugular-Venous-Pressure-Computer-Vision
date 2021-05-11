@@ -115,13 +115,23 @@ def sticker_detection_coords_2(c, video_stack):
         circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=50, param2=18, minRadius=5, maxRadius=300)
 
         circles = circles[0]
-        # If we have extracted a circle, draw an outline
-        # We only need to detect one circle here, since there will only be one reference object
-        #if circles is not None:
 
+        """
+        # Order by pixel y coordinate (2nd one for sternum) 
         if len(circles) == 3:
             circles = np.round(circles).astype("int")
             circles = sorted(circles, key=lambda x: x[1])
+            for idx in range(len(circles)):
+                radii.append(circles[idx][2])
+                coords.append((circles[idx][0], circles[idx][1]))
+
+            radii_coords[i] = circles
+        """
+
+        # Order by pixel x coordinate (3rd one for sternum)
+        if len(circles) == 3:
+            circles = np.round(circles).astype("int")
+            circles = sorted(circles, key=lambda x: x[0])
             for idx in range(len(circles)):
                 radii.append(circles[idx][2])
                 coords.append((circles[idx][0], circles[idx][1]))
