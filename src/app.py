@@ -447,13 +447,13 @@ def save_video(video_tensor, fps, filename, var, beat_indexes, coords_and_radius
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    color = request.args.get('radiocolor')
     alpha = float(request.args.get('alpha'))
     cutoff = float(request.args.get('cutoff'))
     low = float(request.args.get('low'))
     high = float(request.args.get('high'))
     linearAttenuation = float(request.args.get('linearAttenuation'))
     chromAttenuation = float(request.args.get('chromAttenuation'))
-    color = str(request.args.get('radiocolor'))
     print(color)
 
     print(f"Alpha = {alpha}\nCutOff = {cutoff}\nLow = {low}\n"
