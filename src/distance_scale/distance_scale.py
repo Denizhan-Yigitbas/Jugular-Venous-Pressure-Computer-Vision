@@ -482,19 +482,19 @@ def average_sternum_position(coords_and_radius, min_x, min_y):
     sternum_x = []
     sternum_y = []
 
-    """
     # Order by pixel y coordinate (2nd one for sternum)
     for stickers in coords_and_radius.keys():
         sternum = sticker_coord_calibration(coords_and_radius[stickers][1], min_x, min_y)
         sternum_x.append(sternum[0])
         sternum_y.append(sternum[1])
-    """
 
+    """
     # Order by pixel x coordinate (3rd one for sternum)
     for stickers in coords_and_radius.keys():
         sternum = sticker_coord_calibration(coords_and_radius[stickers][2], min_x, min_y)
         sternum_x.append(sternum[0])
         sternum_y.append(sternum[1])
+    """
 
     avg_sternum_x = int(np.mean(sternum_x))
     avg_sternum_y = int(np.mean(sternum_y))
@@ -506,9 +506,17 @@ def average_jaw_radius(coords_and_radius):
 
     jaw_radius = []
 
+    # Order by pixel y coordinate (2nd one for sternum)
     for stickers in coords_and_radius.keys():
         jaw_r = coords_and_radius[stickers][0][2]
         jaw_radius.append(jaw_r)
+
+    """
+    # Order by pixel x coordinate (3rd one for sternum)
+    for stickers in coords_and_radius.keys():
+        jaw_r = coords_and_radius[stickers][0][0]
+        jaw_radius.append(jaw_r)
+    """
 
     avg_jaw_radius = np.mean(jaw_radius)
 

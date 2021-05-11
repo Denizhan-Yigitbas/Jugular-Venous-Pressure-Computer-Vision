@@ -116,7 +116,6 @@ def sticker_detection_coords_2(c, video_stack):
 
         circles = circles[0]
 
-        """
         # Order by pixel y coordinate (2nd one for sternum) 
         if len(circles) == 3:
             circles = np.round(circles).astype("int")
@@ -126,8 +125,8 @@ def sticker_detection_coords_2(c, video_stack):
                 coords.append((circles[idx][0], circles[idx][1]))
 
             radii_coords[i] = circles
-        """
 
+        """
         # Order by pixel x coordinate (3rd one for sternum)
         if len(circles) == 3:
             circles = np.round(circles).astype("int")
@@ -137,6 +136,7 @@ def sticker_detection_coords_2(c, video_stack):
                 coords.append((circles[idx][0], circles[idx][1]))
 
             radii_coords[i] = circles
+        """
 
     # Find min_x, min_y, max_x, max_y for cropping whole video
     min_x = int(min(coords, key=lambda t: t[0])[0])
