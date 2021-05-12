@@ -17,7 +17,7 @@ from Chunking.process_audio import mark_video, video2audio
 from distance_scale.distance_scale import sticker_detection_coords_frame, draw_scale_on_video, draw_scale_on_video2, \
     pxl_to_dist
 
-from src.distance_scale.distance_scale import average_sternum_position, average_jaw_radius
+from distance_scale.distance_scale import average_sternum_position, average_jaw_radius
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 target = os.path.join(APP_ROOT, 'UPLOAD_FOLDER/')

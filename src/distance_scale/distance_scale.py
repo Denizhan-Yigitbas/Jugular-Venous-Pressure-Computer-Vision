@@ -7,7 +7,7 @@ import numpy as np
 import math
 import heapq
 
-from src.EVM_Python.crop_video import sticker_coord_calibration
+from EVM_Python.crop_video import sticker_coord_calibration
 
 
 class LineBuilder:
