@@ -68,7 +68,7 @@ def upload_file():
                     high=request.form['high'],
                     linearAttenuation=request.form['linearAttenuation'],
                     chromAttenuation=request.form['chromAttenuation'],
-                    color=request.form['radiocolor'],
+                    color=request.form['color'],
                 )
             )
     return render_template('upload.html', no_file_selected=False)
@@ -447,14 +447,13 @@ def save_video(video_tensor, fps, filename, var, beat_indexes, coords_and_radius
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    color = int(request.args.get('color'))
     alpha = float(request.args.get('alpha'))
     cutoff = float(request.args.get('cutoff'))
     low = float(request.args.get('low'))
     high = float(request.args.get('high'))
     linearAttenuation = float(request.args.get('linearAttenuation'))
     chromAttenuation = float(request.args.get('chromAttenuation'))
-    color = str(request.args.get('radiocolor'))
-    print(color)
 
     print(f"Alpha = {alpha}\nCutOff = {cutoff}\nLow = {low}\n"
           f"High = {high}\nLinearAttenuation = {linearAttenuation}\n"

@@ -88,12 +88,12 @@ def sticker_detection_coords_2(c, video_stack):
         # Red color mask: issue with missing red points
         img_hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-        if c == 'green':
+        if c == 0:  # corresponds to green
             lower1 = np.array([50, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
             upper1 = np.array([90, 255, 255], dtype="uint8")
-        else:  # c == 'blue'
-            lower1 = np.array([110, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
-            upper1 = np.array([130, 255, 255], dtype="uint8")
+        else:  # c == 1, corresponds to blue
+            lower1 = np.array([100, 50, 50], dtype="uint8")  # Use 100 for the third, for stationary
+            upper1 = np.array([140, 255, 255], dtype="uint8")
 
         #lower2 = np.array([170, 155, 160], dtype="uint8")
         #upper2 = np.array([179, 255, 255], dtype="uint8")
@@ -115,10 +115,8 @@ def sticker_detection_coords_2(c, video_stack):
         circles = cv2.HoughCircles(output, cv2.HOUGH_GRADIENT, 1, 100, param1=50, param2=18, minRadius=5, maxRadius=300)
 
         circles = circles[0]
-        # If we have extracted a circle, draw an outline
-        # We only need to detect one circle here, since there will only be one reference object
-        #if circles is not None:
 
+        # Order by pixel y coordinate (2nd one for sternum) 
         if len(circles) == 3:
             circles = np.round(circles).astype("int")
             circles = sorted(circles, key=lambda x: x[1])
@@ -127,6 +125,18 @@ def sticker_detection_coords_2(c, video_stack):
                 coords.append((circles[idx][0], circles[idx][1]))
 
             radii_coords[i] = circles
+
+        """
+        # Order by pixel x coordinate (3rd one for sternum)
+        if len(circles) == 3:
+            circles = np.round(circles).astype("int")
+            circles = sorted(circles, key=lambda x: x[0])
+            for idx in range(len(circles)):
+                radii.append(circles[idx][2])
+                coords.append((circles[idx][0], circles[idx][1]))
+
+            radii_coords[i] = circles
+        """
 
     # Find min_x, min_y, max_x, max_y for cropping whole video
     min_x = int(min(coords, key=lambda t: t[0])[0])
