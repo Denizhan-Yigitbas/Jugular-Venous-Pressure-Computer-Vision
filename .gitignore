@@ -2,3 +2,4 @@ venv/*
 settings.json
 src/images
 .DS_Store
+.idea/*
