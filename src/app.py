@@ -74,8 +74,7 @@ def upload_file():
     return render_template('upload.html', no_file_selected=False)
 
 
-"""
-@app.route('/get-height/', methods=['GET', 'POST'])
+@app.route('/crop/', methods=['GET', 'POST'])
 def upload_jvp_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -90,32 +89,18 @@ def upload_jvp_file():
             # TODO: Think about this?
             # flash('No selected file')
             # return redirect(request.url)
-            return render_template('measure_jvp.html', no_file_selected=True)
+            return render_template('crop_video.html', no_file_selected=True)
         if file:
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(
                 url_for(
-                    'measure_jvp',
+                    'crop_uploaded_file',
                     filename=filename,
-                    frame_num=request.form['frame_num'],
+                    color=request.form['color'],
                 )
             )
-    return render_template('measure_jvp.html', no_file_selected=False)
-
-
-@app.route('/get-height/uploads/<filename>')
-def measure_jvp(filename):
-
-    video_stack, _, _, _ = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    frame_num = int(request.args.get('frame_num'))
-    frame = video_stack[frame_num]
-
-    draw_line_on_image(frame)
-
-
-    return render_template('measure_jvp.html', no_file_selected=True)
-"""
+    return render_template('crop_video.html', no_file_selected=False)
 
 
 def load_video(vidFile):
@@ -565,6 +550,73 @@ def uploaded_file(filename):
     return send_from_directory(
         app.config['UPLOAD_FOLDER'],
         filename + extra,
+        as_attachment=True
+    )
+
+
+@app.route('/crop/uploads/<filename>')
+def crop_uploaded_file(filename):
+    color = int(request.args.get('color'))
+
+    print("File Submission Clicked: " + filename)
+    print("Loading Video...")
+    start = time.time()
+    t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    end = time.time()
+    print("Video Loaded in " + str(end - start) + " seconds\n")
+
+    print("Cropping Video...")
+    start = time.time()
+    # Find the coordinates based on stickers to crop the videos
+    min_x, min_y, max_x, max_y, coords_radii = sticker_detection_coords_2(color, video_stack=t)
+
+    min_x = max(min_x - CROPPING_MARGIN, 0)
+    min_y = max(min_y - CROPPING_MARGIN, 0)
+    max_x = min(max_x + CROPPING_MARGIN, width)
+    max_y = min(max_y + CROPPING_MARGIN, height)
+
+    # TODO: Video preprocessing
+    # Insert calls to the circle finding code here to identify cropping targets
+    # Fallback (in the event no/partial circles identified) should be base video bounds
+    t, width, height, min_x, min_y = crop_video(
+        video_stack=t,
+        min_x=min_x,
+        min_y=min_y,
+        max_x=max_x,
+        max_y=max_y,
+    )
+    end = time.time()
+    print("Video cropped in " + str(end - start) + " seconds\n")
+
+
+    print("Saving Video")
+    start = time.time()
+
+    new_fn = filename.split(".")
+    new_fn[0] += "_cropped"
+    new_fn = ".".join(new_fn)
+    path = os.path.join(app.config['UPLOAD_FOLDER'], new_fn)
+
+    if platform.system() == 'Linux':
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    else:
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    [height, width] = t[0].shape[0:2]
+    writer = cv2.VideoWriter(path, fourcc, fps, (width, height), 1)
+
+    for i in range(t.shape[0]):
+
+        frame = cv2.convertScaleAbs(t[i])
+        writer.write(frame)
+
+    writer.release()
+
+    end = time.time()
+    print("Video Saved in " + str(end - start) + " seconds!!!")
+
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        new_fn,
         as_attachment=True
     )
 
