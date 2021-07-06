@@ -58,6 +58,7 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
             return redirect(
                 url_for(
                     'uploaded_file',
@@ -92,7 +93,8 @@ def upload_jvp_file():
             return render_template('crop_video.html', no_file_selected=True)
         if file:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            filesave = os.path.normpath(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(filesave)
             return redirect(
                 url_for(
                     'crop_uploaded_file',
@@ -402,7 +404,8 @@ def save_video(video_tensor, fps, filename, var, beat_indexes, coords_and_radius
      :param filename: input video name
      :param var: variables used in EVM (alpha, cutoff, low, high, linearattenuation, chromattenuation)
      """
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    # path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    path = os.path.normpath(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     extra = '(alpha-' + str(var[0]) + ', cutoff-' + str(var[1]) + ', low-' + str(var[2]) + ', high-' + str(
         var[3]) + ', linear-' + str(var[4]) + ', chrom-' + str(var[5]) + ').avi'
     if platform.system() == 'Linux':
@@ -546,10 +549,13 @@ def uploaded_file(filename):
     # image_file = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # open colour image
     # image_file = image_file.convert('1') # convert image to black and white
     # image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    # print("DEBUG")
+    # print(app.config['UPLOAD_FOLDER'])
+    # print(filename+extra)
 
     return send_from_directory(
         app.config['UPLOAD_FOLDER'],
-        filename + extra,
+        filename[:-4] + extra,
         as_attachment=True
     )
 
@@ -597,6 +603,7 @@ def crop_uploaded_file(filename):
     new_fn = ".".join(new_fn)
     path = os.path.join(app.config['UPLOAD_FOLDER'], new_fn)
 
+
     if platform.system() == 'Linux':
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     else:
@@ -622,4 +629,4 @@ def crop_uploaded_file(filename):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="localhost")
