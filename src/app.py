@@ -451,6 +451,7 @@ def uploaded_file(filename):
 
     print("File Submission Clicked: " + filename)
     print("Loading Video...")
+    begin = time.time()
     start = time.time()
     t, fps, width, height = load_video(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     end = time.time()
@@ -544,6 +545,7 @@ def uploaded_file(filename):
     extra = save_video(final, fps, filename, var, peaks, coords_radii, min_x, min_y)
     end = time.time()
     print("Video Saved in " + str(end - start) + " seconds!!!")
+    print("Total runtime = " + str(end - begin) + " seconds")
 
     # Convert uploaded image to Black and White - REMOVE
     # image_file = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # open colour image

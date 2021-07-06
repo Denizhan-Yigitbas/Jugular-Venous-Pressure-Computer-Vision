@@ -81,7 +81,7 @@ def mark_video(vid_array, audio_arr, f_audio, f_video):
 
         # Black out specified region
         # print(min_frame,max_frame, min_y,max_y, min_x,max_x)
-        vid_array[min_frame:max_frame, min_y:max_y, min_x:max_x, :] = 0
+        vid_array[min_frame:max_frame, min_y:max_y, min_x:max_x, :] = np.array([0, 0, 255])
 
     return vid_array, peaks
 
